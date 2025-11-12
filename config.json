@@ -1,0 +1,81 @@
+{
+  "port": 3000,
+  "apiKey": "your-secret-api-key-here",
+  "corsOrigins": ["http://localhost:3000"],
+  "rateLimitWindowMs": 60000,
+  "rateLimitMaxRequests": 30,
+  "commands": [
+    { 
+      "id": 1, 
+      "name": "Shutdown", 
+      "command": "shutdown /s /t 0",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": true,
+      "description": "Spegne il computer immediatamente"
+    },
+    { 
+      "id": 2, 
+      "name": "Sleep", 
+      "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": true,
+      "description": "Mette il computer in modalità sleep"
+    },
+    { 
+      "id": 3, 
+      "name": "Hibernate", 
+      "command": "shutdown /h",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": true,
+      "description": "Iberna il computer"
+    },
+    { 
+      "id": 4, 
+      "name": "Notepad", 
+      "command": "notepad",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": false,
+      "description": "Apre Notepad"
+    },
+    { 
+      "id": 5, 
+      "name": "Calculator", 
+      "command": "calc",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": false,
+      "description": "Apre la calcolatrice"
+    },
+    { 
+      "id": 6, 
+      "name": "Paint", 
+      "command": "mspaint",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": false,
+      "description": "Apre Paint"
+    },
+    {
+      "id": 7,
+      "name": "Focus Chrome",
+      "command": "powershell.exe -ExecutionPolicy Bypass -File focus-window.ps1 -WindowTitle Chrome",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": false,
+      "description": "Porta Chrome in primo piano"
+    },
+    {
+      "id": 8,
+      "name": "Focus Notepad",
+      "command": "powershell.exe -ExecutionPolicy Bypass -File focus-window.ps1 -WindowTitle Notepad",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": false,
+      "description": "Porta Notepad in primo piano"
+    },
+    {
+      "id": 9,
+      "name": "Focus Calculator",
+      "command": "powershell.exe -ExecutionPolicy Bypass -File focus-window.ps1 -WindowTitle Calculator",
+      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
+      "requiresConfirmation": false,
+      "description": "Porta Calculator in primo piano"
+    }
+  ]
+}
