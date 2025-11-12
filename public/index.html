@@ -4,633 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Commands - Control Panel</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .auth-section {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-danger {
-            background: #f56565;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #e53e3e;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
-        }
-
-        .btn-secondary {
-            background: #718096;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #4a5568;
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-left: 10px;
-        }
-
-        .status-online {
-            background: #48bb78;
-            box-shadow: 0 0 10px #48bb78;
-        }
-
-        .status-offline {
-            background: #f56565;
-        }
-
-        .commands-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .command-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .command-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .command-icon {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 15px;
-            display: block;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-
-        .command-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-
-        .command-description {
-            font-size: 0.9rem;
-            color: #718096;
-            margin-bottom: 15px;
-        }
-
-        .command-status {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-running {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        .status-stopped {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-
-        .command-pid {
-            font-size: 0.85rem;
-            color: #718096;
-            margin-bottom: 15px;
-        }
-
-        .command-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .command-actions button {
-            flex: 1;
-            min-width: 100px;
-            padding: 10px;
-            font-size: 0.9rem;
-        }
-        
-        .btn-focus {
-            background: #48bb78;
-            color: white;
-        }
-        
-        .btn-focus:hover {
-            background: #38a169;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
-        }
-
-        .alert {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: #c6f6d5;
-            color: #22543d;
-            border-left: 4px solid #48bb78;
-        }
-
-        .alert-error {
-            background: #fed7d7;
-            color: #742a2a;
-            border-left: 4px solid #f56565;
-        }
-
-        .alert-warning {
-            background: #feebc8;
-            color: #7c2d12;
-            border-left: 4px solid #ed8936;
-        }
-
-        .stats-section {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 15px;
-            background: #f7fafc;
-            border-radius: 10px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .loading {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div class="container">
-        <header>
+    <div id="app">
+        <header class="app-header">
             <h1>🎮 Web Commands</h1>
             <p class="subtitle">Control Panel per comandi Windows</p>
         </header>
 
-        <div id="authSection" class="auth-section">
-            <h2 style="margin-bottom: 20px; color: #2d3748;">Autenticazione</h2>
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    id="apiKeyInput" 
-                    placeholder="Inserisci la tua API Key"
-                    value="your-secret-api-key-here"
-                >
-                <button class="btn-primary" id="connectBtn">Connetti</button>
+        <!-- Sezione Autenticazione -->
+        <section v-if="!authenticated" class="auth-section">
+            <div class="auth-card">
+                <h2>Autenticazione</h2>
+                <div class="input-group">
+                    <input 
+                        v-model="apiKeyInput" 
+                        type="text" 
+                        placeholder="Inserisci la tua API Key"
+                        @keypress.enter="authenticate"
+                        class="api-key-input"
+                    >
+                    <button @click="authenticate" class="btn btn-primary">Connetti</button>
+                </div>
+                <p class="hint">💡 API Key configurata in config.json</p>
             </div>
-            <p style="font-size: 0.9rem; color: #718096; margin-top: 10px;">
-                💡 API Key configurata in config.json
-            </p>
-        </div>
+        </section>
 
-        <div id="mainContent" class="hidden">
-            <div id="alertContainer"></div>
+        <!-- Contenuto Principale -->
+        <main v-else class="main-content">
+            <!-- Alert Messages -->
+            <transition-group name="alert-slide" tag="div" class="alert-container">
+                <div 
+                    v-for="alert in alerts" 
+                    :key="alert.id"
+                    :class="['alert', `alert-${alert.type}`]"
+                >
+                    {{ alert.message }}
+                </div>
+            </transition-group>
 
-            <div class="stats-section">
+            <!-- Statistiche -->
+            <section class="stats-section">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-value" id="totalCommands">0</div>
+                        <div class="stat-value">{{ commands.length }}</div>
                         <div class="stat-label">Comandi Totali</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="runningCommands">0</div>
+                        <div class="stat-value">{{ runningCount }}</div>
                         <div class="stat-label">In Esecuzione</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">
-                            <span class="status-indicator" id="serverStatus"></span>
+                            <span :class="['status-indicator', serverOnline ? 'status-online' : 'status-offline']"></span>
                         </div>
                         <div class="stat-label">Stato Server</div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="commands-grid" id="commandsGrid"></div>
-        </div>
+            <!-- Griglia Comandi -->
+            <section class="commands-section">
+                <div class="commands-grid">
+                    <command-card
+                        v-for="cmd in commands"
+                        :key="cmd.id"
+                        :command="cmd"
+                        @execute="executeCommand"
+                        @focus="focusWindow"
+                        @kill="killCommand"
+                    ></command-card>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <script>
-        let apiKey = '';
-        const API_BASE = '/api';
-
-        function showAlert(message, type = 'success') {
-            const alertContainer = document.getElementById('alertContainer');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            alertContainer.appendChild(alert);
-
-            setTimeout(() => {
-                alert.remove();
-            }, 5000);
-        }
-
-        async function authenticate() {
-            const input = document.getElementById('apiKeyInput');
-            apiKey = input.value.trim();
-
-            if (!apiKey) {
-                showAlert('Inserisci una API Key valida', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/health`);
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('authSection').classList.add('hidden');
-                    document.getElementById('mainContent').classList.remove('hidden');
-                    showAlert('Autenticazione riuscita!', 'success');
-                    loadCommands();
-                    checkServerStatus();
-                    setInterval(loadCommands, 5000); // Aggiorna ogni 5 secondi
-                }
-            } catch (error) {
-                showAlert('Errore di connessione al server', 'error');
-            }
-        }
-
-        async function checkServerStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/health`);
-                const data = await response.json();
-                const statusIndicator = document.getElementById('serverStatus');
-                
-                if (data.success) {
-                    statusIndicator.className = 'status-indicator status-online';
-                } else {
-                    statusIndicator.className = 'status-indicator status-offline';
-                }
-            } catch (error) {
-                document.getElementById('serverStatus').className = 'status-indicator status-offline';
-            }
-        }
-
-        async function loadCommands() {
-            try {
-                const response = await fetch(`${API_BASE}/commands`, {
-                    headers: {
-                        'X-API-Key': apiKey
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Errore caricamento comandi');
-                }
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    renderCommands(data.commands);
-                    updateStats(data.commands);
-                }
-            } catch (error) {
-                showAlert('Errore caricamento comandi: ' + error.message, 'error');
-            }
-        }
-
-        function updateStats(commands) {
-            document.getElementById('totalCommands').textContent = commands.length;
-            const runningCount = commands.filter(cmd => cmd.isRunning).length;
-            document.getElementById('runningCommands').textContent = runningCount;
-        }
-
-        function renderCommands(commands) {
-            const grid = document.getElementById('commandsGrid');
-            grid.innerHTML = '';
-
-            commands.forEach(cmd => {
-                const card = document.createElement('div');
-                card.className = 'command-card';
-                
-                const statusClass = cmd.isRunning ? 'status-running' : 'status-stopped';
-                const statusText = cmd.isRunning ? 'RUNNING' : 'STOPPED';
-                
-                const pidInfo = cmd.isRunning ? 
-                    `<div class="command-pid">PID: ${cmd.pid}</div>` : '';
-
-                const confirmWarning = cmd.requiresConfirmation ?
-                    `<div class="alert alert-warning" style="font-size: 0.8rem; padding: 8px 12px; margin-bottom: 10px;">
-                        ⚠️ Richiede conferma
-                    </div>` : '';
-
-                const iconUrl = cmd.icon || 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg';
-                
-                card.innerHTML = `
-                    <div class="command-status ${statusClass}">${statusText}</div>
-                    <img src="${iconUrl}" alt="${cmd.name}" class="command-icon">
-                    <div class="command-name">${cmd.name}</div>
-                    <div class="command-description">${cmd.description || cmd.command}</div>
-                    ${pidInfo}
-                    ${confirmWarning}
-                    <div class="command-actions">
-                        <button 
-                            class="btn-primary execute-btn" 
-                            data-id="${cmd.id}"
-                            data-name="${cmd.name}"
-                            data-confirm="${cmd.requiresConfirmation}"
-                            ${cmd.isRunning ? 'disabled' : ''}
-                        >
-                            ▶ Esegui
-                        </button>
-                        <button 
-                            class="btn-focus focus-btn" 
-                            data-pid="${cmd.pid}"
-                            data-name="${cmd.name}"
-                            ${!cmd.isRunning ? 'disabled' : ''}
-                            title="Porta in primo piano"
-                        >
-                            🔍 Focus
-                        </button>
-                        <button 
-                            class="btn-danger kill-btn" 
-                            data-id="${cmd.id}"
-                            data-name="${cmd.name}"
-                            ${!cmd.isRunning ? 'disabled' : ''}
-                        >
-                            ⏹ Stop
-                        </button>
-                    </div>
-                `;
-                
-                // Aggiungi event listeners
-                const executeBtn = card.querySelector('.execute-btn');
-                const focusBtn = card.querySelector('.focus-btn');
-                const killBtn = card.querySelector('.kill-btn');
-                
-                if (executeBtn) {
-                    executeBtn.addEventListener('click', () => {
-                        executeCommand(cmd.id, cmd.name, cmd.requiresConfirmation);
-                    });
-                }
-                
-                if (focusBtn) {
-                    focusBtn.addEventListener('click', () => {
-                        focusWindow(cmd.pid, cmd.name);
-                    });
-                }
-                
-                if (killBtn) {
-                    killBtn.addEventListener('click', () => {
-                        killCommand(cmd.id, cmd.name);
-                    });
-                }
-                
-                // Fallback per immagine
-                const img = card.querySelector('.command-icon');
-                if (img) {
-                    img.addEventListener('error', () => {
-                        img.src = 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg';
-                    });
-                }
-                
-                grid.appendChild(card);
-            });
-        }
-
-        async function executeCommand(id, name, requiresConfirmation) {
-            if (requiresConfirmation) {
-                if (!confirm(`Sei sicuro di voler eseguire "${name}"?`)) {
-                    return;
-                }
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/commands/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-API-Key': apiKey
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showAlert(`✅ ${name} avviato con successo (PID: ${data.pid})`, 'success');
-                    loadCommands();
-                } else {
-                    showAlert(`❌ Errore: ${data.error}`, 'error');
-                }
-            } catch (error) {
-                showAlert(`❌ Errore esecuzione: ${error.message}`, 'error');
-            }
-        }
-
-        async function killCommand(id, name) {
-            if (!confirm(`Vuoi terminare "${name}"?`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/commands/${id}/kill`, {
-                    method: 'POST',
-                    headers: {
-                        'X-API-Key': apiKey
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showAlert(`✅ ${name} terminato con successo`, 'success');
-                    loadCommands();
-                } else {
-                    showAlert(`❌ Errore: ${data.error}`, 'error');
-                }
-            } catch (error) {
-                showAlert(`❌ Errore terminazione: ${error.message}`, 'error');
-            }
-        }
-
-        async function focusWindow(pid, name) {
-            if (!pid) {
-                showAlert('⚠️ Processo non disponibile', 'warning');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/focus/${pid}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-API-Key': apiKey
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showAlert(`✅ ${name} portato in primo piano`, 'success');
-                } else {
-                    showAlert(`❌ ${data.error}`, 'error');
-                }
-            } catch (error) {
-                showAlert(`❌ Errore focus: ${error.message}`, 'error');
-            }
-        }
-
-        // Auto-login se c'è la chiave preimpostata
-        window.addEventListener('DOMContentLoaded', () => {
-            // Aggiungi listener per il bottone Connetti
-            const connectBtn = document.getElementById('connectBtn');
-            if (connectBtn) {
-                connectBtn.addEventListener('click', authenticate);
-            }
-            
-            // Aggiungi listener per Enter sulla input
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            if (apiKeyInput) {
-                apiKeyInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        authenticate();
-                    }
-                });
-            }
-            
-            // Auto-login se c'è la chiave preimpostata
-            const defaultKey = apiKeyInput?.value;
-            if (defaultKey && defaultKey !== 'your-secret-api-key-here') {
-                authenticate();
-            }
-        });
-    </script>
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- App Components -->
+    <script src="js/components/CommandCard.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

@@ -66,12 +66,24 @@ npm run uninstall-service
 
 Apri il browser su: `http://localhost:3000`
 
+**Tecnologia:** Vue.js 3 (CDN)
+
 L'interfaccia permette di:
 - Visualizzare tutti i comandi disponibili
 - Eseguire comandi con un click
+- Portare finestre in primo piano (Focus)
 - Terminare processi in esecuzione
 - Vedere statistiche in tempo reale
 - Conferma richiesta per comandi critici (shutdown, sleep, hibernate)
+- Alert system con notifiche auto-dismiss
+
+**Struttura:**
+- `public/index.html` - Entry point HTML
+- `public/js/app.js` - Vue app principale
+- `public/js/components/CommandCard.js` - Componente carta comando
+- `public/css/main.css` - Stili completi
+
+Vedi [FRONTEND_VUE.md](FRONTEND_VUE.md) per documentazione dettagliata.
 
 ## 🔐 API Endpoints
 
