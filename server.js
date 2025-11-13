@@ -58,16 +58,6 @@ app.use(express.static('public'));
 // });
 // app.use('/api/', limiter);
 
-// Middleware autenticazione
-function authenticate(req, res, next) {
-	const apiKey = req.headers['x-api-key'];
-	if (!apiKey || apiKey !== config.apiKey) {
-		logger.warn(`Tentativo di accesso non autorizzato da ${req.ip}`);
-		return res.status(401).json({ success: false, error: 'Non autorizzato' });
-	}
-	next();
-}
-
 // Mappa per tracciare PID
 const runningApps = {};
 
@@ -270,7 +260,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Endpoint: lista comandi
-app.get('/api/commands', authenticate, (req, res) => {
+app.get('/api/commands', (req, res) => {
 	try {
 		const commandsWithStatus = config.commands.map(cmd => ({
 			...cmd,
@@ -285,7 +275,7 @@ app.get('/api/commands', authenticate, (req, res) => {
 });
 
 // Endpoint: lista processi in esecuzione
-app.get('/api/running', authenticate, (req, res) => {
+app.get('/api/running', (req, res) => {
 	try {
 		res.json({ success: true, running: runningApps });
 	} catch (error) {
@@ -295,7 +285,7 @@ app.get('/api/running', authenticate, (req, res) => {
 });
 
 // Endpoint: lista finestre Windows aperte
-app.get('/api/windows', authenticate, (req, res) => {
+app.get('/api/windows', (req, res) => {
 	try {
 		logger.info('Richiesta lista finestre aperte');
 		const scriptPath = path.join(__dirname, 'scripts', 'list-windows.ps1');
@@ -332,7 +322,7 @@ app.get('/api/windows', authenticate, (req, res) => {
 });
 
 // Endpoint: controlla quali comandi sono già in esecuzione
-app.post('/api/check-commands', authenticate, (req, res) => {
+app.post('/api/check-commands', (req, res) => {
 	try {
 		const commandsToCheck = req.body.commands || [];
 		
@@ -382,7 +372,7 @@ app.post('/api/check-commands', authenticate, (req, res) => {
 });
 
 // Endpoint: porta in primo piano finestra tramite PID
-app.post('/api/focus/:pid', authenticate, async (req, res) => {
+app.post('/api/focus/:pid', async (req, res) => {
 	try {
 		const pid = parseInt(req.params.pid);
 		
@@ -434,7 +424,7 @@ app.post('/api/focus/:pid', authenticate, async (req, res) => {
 });
 
 // Endpoint: adotta processo già avviato
-app.post('/api/commands/:id/adopt', authenticate, async (req, res) => {
+app.post('/api/commands/:id/adopt', async (req, res) => {
 	try {
 		const cmdId = parseInt(req.params.id);
 		const { pid, processName, windowTitle } = req.body;
@@ -478,7 +468,7 @@ app.post('/api/commands/:id/adopt', authenticate, async (req, res) => {
 });
 
 // Endpoint: esegue comando
-app.post('/api/commands/:id', authenticate, async (req, res) => {
+app.post('/api/commands/:id', async (req, res) => {
 	try {
 		const cmdId = parseInt(req.params.id);
 		
@@ -524,7 +514,7 @@ app.post('/api/commands/:id', authenticate, async (req, res) => {
 });
 
 // Endpoint: termina comando/app
-app.post('/api/commands/:id/kill', authenticate, async (req, res) => {
+app.post('/api/commands/:id/kill', async (req, res) => {
 	try {
 		const cmdId = parseInt(req.params.id);
 		

@@ -4,11 +4,6 @@ const { createApp } = Vue;
 const app = createApp({
     data() {
         return {
-            // Auth
-            authenticated: false,
-            apiKey: '',
-            apiKeyInput: 'your-secret-api-key-here',
-            
             // State
             commands: [],
             serverOnline: false,
@@ -26,41 +21,10 @@ const app = createApp({
         }
     },
     methods: {
-        // ==================== AUTH ====================
-        async authenticate() {
-            this.apiKey = this.apiKeyInput.trim();
-            
-            if (!this.apiKey) {
-                this.showAlert('Inserisci una API Key valida', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${this.apiBase}/health`);
-                const data = await response.json();
-
-                if (data.success) {
-                    this.authenticated = true;
-                    this.showAlert('Autenticazione riuscita!', 'success');
-                    await this.loadCommands();
-                    this.checkServerStatus();
-                    
-                    // Auto-refresh ogni 5 secondi
-                    this.refreshInterval = setInterval(() => {
-                        this.loadCommands();
-                    }, 5000);
-                }
-            } catch (error) {
-                this.showAlert('Errore di connessione al server', 'error');
-            }
-        },
-
         // ==================== API CALLS ====================
         async loadCommands() {
             try {
-                const response = await fetch(`${this.apiBase}/commands`, {
-                    headers: { 'X-API-Key': this.apiKey }
-                });
+                const response = await fetch(`${this.apiBase}/commands`);
 
                 if (!response.ok) {
                     throw new Error('Errore caricamento comandi');
@@ -90,7 +54,6 @@ const app = createApp({
                 const response = await fetch(`${this.apiBase}/check-commands`, {
                     method: 'POST',
                     headers: { 
-                        'X-API-Key': this.apiKey,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ commands: commandsToCheck })
@@ -138,7 +101,6 @@ const app = createApp({
                 const response = await fetch(`${this.apiBase}/commands/${cmdId}/adopt`, {
                     method: 'POST',
                     headers: {
-                        'X-API-Key': this.apiKey,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
@@ -198,8 +160,7 @@ const app = createApp({
 
             try {
                 const response = await fetch(`${this.apiBase}/commands/${id}`, {
-                    method: 'POST',
-                    headers: { 'X-API-Key': this.apiKey }
+                    method: 'POST'
                 });
 
                 const data = await response.json();
@@ -223,8 +184,7 @@ const app = createApp({
 
             try {
                 const response = await fetch(`${this.apiBase}/focus/${pid}`, {
-                    method: 'POST',
-                    headers: { 'X-API-Key': this.apiKey }
+                    method: 'POST'
                 });
 
                 const data = await response.json();
@@ -246,8 +206,7 @@ const app = createApp({
 
             try {
                 const response = await fetch(`${this.apiBase}/commands/${id}/kill`, {
-                    method: 'POST',
-                    headers: { 'X-API-Key': this.apiKey }
+                    method: 'POST'
                 });
 
                 const data = await response.json();
@@ -272,13 +231,27 @@ const app = createApp({
             setTimeout(() => {
                 this.alerts = this.alerts.filter(alert => alert.id !== id);
             }, 5000);
+        },
+
+        async checkServerStatus() {
+            try {
+                const response = await fetch(`${this.apiBase}/health`);
+                const data = await response.json();
+                this.serverOnline = data.success || false;
+            } catch {
+                this.serverOnline = false;
+            }
         }
     },
     mounted() {
-        // Auto-login se c'è la chiave preimpostata
-        if (this.apiKeyInput && this.apiKeyInput !== 'your-secret-api-key-here') {
-            this.authenticate();
-        }
+        // Auto-start app
+        this.loadCommands();
+        this.checkServerStatus();
+        
+        // Auto-refresh ogni 5 secondi
+        this.refreshInterval = setInterval(() => {
+            this.loadCommands();
+        }, 5000);
     },
     beforeUnmount() {
         // Cleanup interval

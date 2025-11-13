@@ -14,29 +14,8 @@
             <p class="subtitle">Control Panel per comandi Windows</p>
         </header>
 
-        <!-- Sezione Autenticazione -->
-        <section v-if="!authenticated" class="auth-section">
-            <div class="auth-card">
-                <h2>Autenticazione</h2>
-                <div class="input-group">
-                    <input 
-                        v-model="apiKeyInput" 
-                        type="text" 
-                        placeholder="Inserisci la tua API Key"
-                        @keypress.enter="authenticate"
-                        class="api-key-input"
-                    >
-                    <button @click="authenticate" class="btn btn-primary">
-                        <i class="fas fa-plug"></i>
-                        Connetti
-                    </button>
-                </div>
-                <p class="hint"><i class="fas fa-lightbulb"></i> API Key configurata in config.json</p>
-            </div>
-        </section>
-
         <!-- Contenuto Principale -->
-        <main v-else class="main-content">
+        <main class="main-content">
             <!-- Alert Messages -->
             <transition-group name="alert-slide" tag="div" class="alert-container">
                 <div 
