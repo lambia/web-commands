@@ -49,6 +49,19 @@ try {
         exit 0
     }
     
+    # Verifica se il processo iniziale esiste ancora
+    $initialProcessStillExists = Get-Process -Id $initialProcessPid -ErrorAction SilentlyContinue
+    
+    # Se il processo iniziale è morto MA ci sono nuovi ApplicationFrameHost, è un'app UWP
+    if (-not $initialProcessStillExists) {
+        $uwpWindow = $allWindows | Where-Object { $_.ProcessName -eq "ApplicationFrameHost" } | Select-Object -First 1
+        if ($uwpWindow) {
+            $finalProcessPid = $uwpWindow.Id
+            Write-Output "{`"success`":true,`"pid`":$finalProcessPid,`"initialPid`":$initialProcessPid,`"processName`":`"$($uwpWindow.ProcessName)`",`"windowTitle`":`"$($uwpWindow.MainWindowTitle)`"}"
+            exit 0
+        }
+    }
+    
     # Se non ci sono nuove finestre, cerca per nome processo tra le finestre esistenti
     $sameNameProcess = $allWindows | Where-Object { $_.ProcessName -eq $processName } | Select-Object -First 1
     if ($sameNameProcess) {
@@ -57,9 +70,8 @@ try {
         exit 0
     }
     
-    # Verifica che il processo iniziale esista ancora
-    $stillExists = Get-Process -Id $initialProcessPid -ErrorAction SilentlyContinue
-    if ($stillExists -and $stillExists.MainWindowHandle -ne 0) {
+    # Verifica che il processo iniziale esista ancora con finestra
+    if ($initialProcessStillExists -and $initialProcessStillExists.MainWindowHandle -ne 0) {
         Write-Output "{`"success`":true,`"pid`":$initialProcessPid,`"initialPid`":$initialProcessPid,`"processName`":`"$processName`"}"
         exit 0
     }
