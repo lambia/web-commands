@@ -98,7 +98,7 @@ function processExists(pid, processName = null) {
 	});
 }
 
-// Esegue qualsiasi comando in background senza output
+// Esegue qualsiasi comando in background usando cmd.exe
 function runCommand(cmd) {
 	return new Promise((resolve, reject) => {
 		try {
@@ -128,52 +128,101 @@ function runCommand(cmd) {
 				return;
 			}
 			
-		// Per comandi semplici, usa lo script PowerShell start-and-track-process.ps1
-		const scriptPath = path.join(__dirname, 'scripts', 'start-and-track-process.ps1');
-		const psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Command "${cmd.command}"`;			exec(psCommand, { cwd: __dirname }, (err, stdout, stderr) => {
-				if (err) {
-					logger.error(`Errore esecuzione comando ${cmd.name}:`, stderr || err);
-					return reject(err);
-				}
-				
-				try {
-					const result = JSON.parse(stdout.trim());
+			// Salva finestre esistenti PRIMA del lancio
+			exec('powershell.exe -Command "Get-Process | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object Id, MainWindowTitle, ProcessName | ConvertTo-Json"', 
+				(err, stdout) => {
+					const existingWindows = err ? [] : (() => {
+						try {
+							const parsed = JSON.parse(stdout);
+							return Array.isArray(parsed) ? parsed : [parsed];
+						} catch { return []; }
+					})();
 					
-					if (!result.success) {
-						logger.error(`Errore avvio comando ${cmd.name}: ${result.error || result.warning || 'Unknown'}`);
-						// Non rifiutare per warning, solo per errori
-						if (result.error) {
-							return reject(new Error(result.error));
+					// Determina se serve 'start' (per protocolli) o esecuzione diretta
+					const needsStart = cmd.command.includes('://') || cmd.command.startsWith('shell:');
+					const cmdCommand = needsStart 
+						? `cmd.exe /c start "" "${cmd.command}"`
+						: `cmd.exe /c "${cmd.command}"`;
+					
+					// Avvia il comando
+					exec(cmdCommand, { cwd: __dirname }, (err, stdout, stderr) => {
+						if (err) {
+							logger.error(`Errore esecuzione comando ${cmd.name}:`, stderr || err.message);
+							return reject(err);
 						}
-					}
-					
-					const pid = result.pid;
-					const initialPid = result.initialPid;
-					const processName = result.processName;
-					const windowTitle = result.windowTitle || null;
-					
-					runningApps[cmd.id] = {
-						pid: pid,
-						initialPid: initialPid,
-						processName: processName,
-						windowTitle: windowTitle,
-						name: cmd.name,
-						startTime: new Date()
-					};
-					
-					if (pid !== initialPid) {
-						logger.info(`Comando ${cmd.name} avviato - PID iniziale: ${initialPid}, PID finale: ${pid} (${processName}, finestra: ${windowTitle || 'N/A'})`);
-					} else {
-						logger.info(`Comando ${cmd.name} avviato con PID ${pid} (${processName}, finestra: ${windowTitle || 'N/A'})`);
-					}
-					resolve(pid);
-				} catch (parseError) {
-					logger.error(`Errore parsing JSON da comando ${cmd.name}:`, stdout);
-					return reject(parseError);
+						
+						// Aspetta che l'app si stabilizzi
+						setTimeout(() => {
+							// Trova NUOVE finestre
+							exec('powershell.exe -Command "Get-Process | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object Id, MainWindowTitle, ProcessName | ConvertTo-Json"',
+								(err, stdout) => {
+									if (err) {
+										// Fallback: usa PID fittizio
+										const fakePid = Date.now();
+										runningApps[cmd.id] = {
+											pid: fakePid,
+											name: cmd.name,
+											startTime: new Date(),
+											isScript: true
+										};
+										logger.warn(`Impossibile tracciare finestra per ${cmd.name}, uso PID fittizio`);
+										return resolve(fakePid);
+									}
+									
+									try {
+										const allWindows = (() => {
+											const parsed = JSON.parse(stdout);
+											return Array.isArray(parsed) ? parsed : [parsed];
+										})();
+										
+										// Trova finestre nuove
+										const newWindows = allWindows.filter(w => 
+											!existingWindows.some(ew => ew.Id === w.Id)
+										);
+										
+										if (newWindows.length > 0) {
+											const newWindow = newWindows[0];
+											runningApps[cmd.id] = {
+												pid: newWindow.Id,
+												processName: newWindow.ProcessName,
+												windowTitle: newWindow.MainWindowTitle,
+												name: cmd.name,
+												startTime: new Date()
+											};
+											logger.info(`Comando ${cmd.name} avviato con PID ${newWindow.Id} (${newWindow.ProcessName}, finestra: ${newWindow.MainWindowTitle})`);
+											resolve(newWindow.Id);
+										} else {
+											// Nessuna nuova finestra, usa PID fittizio
+											const fakePid = Date.now();
+											runningApps[cmd.id] = {
+												pid: fakePid,
+												name: cmd.name,
+												startTime: new Date(),
+												isScript: true
+											};
+											logger.warn(`Nessuna nuova finestra per ${cmd.name}, uso PID fittizio`);
+											resolve(fakePid);
+										}
+									} catch (parseError) {
+										// Fallback in caso di errore parsing
+										const fakePid = Date.now();
+										runningApps[cmd.id] = {
+											pid: fakePid,
+											name: cmd.name,
+											startTime: new Date(),
+											isScript: true
+										};
+										logger.warn(`Errore parsing finestre per ${cmd.name}, uso PID fittizio`);
+										resolve(fakePid);
+									}
+								}
+							);
+						}, 1500); // Aspetta 1.5 secondi per stabilizzazione
+					});
 				}
-			});
+			);
 		} catch (error) {
-			logger.error(`Errore spawn comando ${cmd.name}:`, error);
+			logger.error(`Errore esecuzione comando ${cmd.name}:`, error);
 			reject(error);
 		}
 	});
