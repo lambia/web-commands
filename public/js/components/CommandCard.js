@@ -27,14 +27,12 @@ const CommandCard = {
             </div>
 
             <!-- Card Content con immagine -->
-            <span v-if="command.img">
-                <img 
-                    :src="command.img.src" 
-                    :alt="command.name"
-                    :class="command.img.class"
-                    @error="handleImageError"
-                >
-            </span>
+            <img v-if="command.img"
+                :src="command.img.src" 
+                :alt="command.name"
+                :class="command.img.class"
+                @error="handleImageError"
+            >
             <!-- Card Content con icona e testo -->
             <span v-else>
                 <i v-if="command.icon" :class="command.icon.class"></i>

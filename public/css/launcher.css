@@ -203,10 +203,14 @@ body {
     display: block;
     width: 100%;
     height: 100%;
-    transform: scale(0.85);
+}
+
+.appCard img, .appCard span {
     transition: all 200ms;
-    object-fit: contain;
-    /* filter rimosso - verrà applicato da card-img-light/dark */
+}
+
+.appCard img {
+    transform: scale(0.85);
 }
 
 .appCard:focus img,
@@ -304,6 +308,10 @@ body {
 /* ==================== IMAGE CLASSES ==================== */
 .card-img-cover {
     object-fit: cover;
+}
+
+.card-img-contain {
+    object-fit: contain;
 }
 
 .card-img-contain {
