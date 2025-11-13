@@ -24,16 +24,10 @@ const CommandCard = {
 
             <!-- Info -->
             <div class="command-name">{{ command.name }}</div>
-            <div class="command-description">{{ command.description || command.command }}</div>
 
             <!-- PID Info -->
             <div v-if="command.isRunning && command.pid" class="command-pid">
                 PID: {{ command.pid }}
-            </div>
-
-            <!-- Warning per comandi critici -->
-            <div v-if="command.requiresConfirmation && !command.isRunning" class="command-warning">
-                <i class="fas fa-exclamation-triangle"></i> Richiede conferma
             </div>
 
             <!-- Actions -->
