@@ -78,8 +78,6 @@ const app = createApp({
                         // Prendi il primo match (o gestisci multi-istanza in futuro)
                         const match = matches[0];
                         
-                        console.log(`✅ Found running: command ${cmdId}, processPid=${match.processPid}, windowPid=${match.windowPid}, isUWP=${match.isUWP}`);
-                        
                         await this.adoptProcess(parseInt(cmdId), {
                             pid: match.processPid,
                             windowPid: match.windowPid,
@@ -112,10 +110,8 @@ const app = createApp({
 
                 const data = await response.json();
                 
-                if (data.success) {
-                    console.log(`✅ Processo adottato: ${window.process} (PID: ${window.pid})`);
-                } else {
-                    console.warn(`⚠️ Impossibile adottare processo ${window.process}: ${data.error}`);
+                if (!data.success) {
+                    console.warn(`Impossibile adottare processo: ${data.error}`);
                 }
             } catch (error) {
                 console.error('Errore adozione processo:', error);

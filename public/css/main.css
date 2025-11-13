@@ -273,15 +273,15 @@ body {
     padding: 25px;
     border-radius: 15px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s;
     position: relative;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
+    border: 2px solid transparent;
 }
 
 .command-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 2px solid black;
 }
 
 .command-status {
@@ -292,16 +292,30 @@ body {
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .status-running {
     background: #c6f6d5;
     color: #22543d;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.status-stopped {
-    background: #e2e8f0;
-    color: #4a5568;
+.status-running:hover {
+    background: #fed7d7;
+    color: #742a2a;
+    transform: scale(1.05);
+}
+
+.stop-icon {
+    transition: all 0.2s;
+}
+
+.status-running:hover .stop-icon {
+    transform: scale(1.2);
 }
 
 .command-icon {
@@ -328,12 +342,6 @@ body {
     flex-grow: 1;
 }
 
-.command-pid {
-    font-size: 0.85rem;
-    color: #718096;
-    margin-bottom: 10px;
-}
-
 .command-warning {
     font-size: 0.8rem;
     padding: 8px 12px;
@@ -342,30 +350,6 @@ body {
     border-radius: 6px;
     margin-bottom: 10px;
     text-align: center;
-}
-
-.command-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: auto;
-}
-
-.command-actions .btn {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-}
-
-/* Pulsante Esegui - larghezza piena */
-.command-actions .btn-execute {
-    flex: 1;
-    width: 100%;
-}
-
-/* Pulsanti Focus e Stop - dividono lo spazio equamente */
-.command-actions .btn-split {
-    flex: 1;
-    min-width: 0;
 }
 
 /* Rimuovi icone emoji, usiamo Font Awesome */

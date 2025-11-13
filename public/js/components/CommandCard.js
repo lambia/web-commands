@@ -8,10 +8,11 @@ const CommandCard = {
         }
     },
     template: `
-        <div class="command-card">
-            <!-- Status Badge -->
-            <div :class="['command-status', statusClass]">
-                {{ statusText }}
+        <div class="command-card" @click="handleCardClick">
+            <!-- Status Badge - solo se running -->
+            <div v-if="command.isRunning" class="command-status status-running" @click.stop="handleStop" title="Termina processo">
+                RUNNING
+                <i class="fas fa-stop stop-icon"></i>
             </div>
 
             <!-- Icon -->
@@ -24,46 +25,6 @@ const CommandCard = {
 
             <!-- Info -->
             <div class="command-name">{{ command.name }}</div>
-
-            <!-- PID Info -->
-            <div v-if="command.isRunning && command.pid" class="command-pid">
-                PID: {{ command.pid }}
-            </div>
-
-            <!-- Actions -->
-            <div class="command-actions">
-                <!-- Pulsante Esegui - visibile solo se NON in esecuzione -->
-                <button 
-                    v-if="!command.isRunning"
-                    @click="$emit('execute', command.id, command.name, command.requiresConfirmation)"
-                    class="btn btn-primary btn-execute"
-                    title="Esegui comando"
-                >
-                    <i class="fas fa-play"></i>
-                    Esegui
-                </button>
-
-                <!-- Pulsanti Focus e Stop - visibili solo se in esecuzione -->
-                <template v-if="command.isRunning">
-                    <button 
-                        @click="$emit('focus', command.pid, command.name)"
-                        class="btn btn-focus btn-split"
-                        title="Porta in primo piano"
-                    >
-                        <i class="fas fa-eye"></i>
-                        Focus
-                    </button>
-
-                    <button 
-                        @click="$emit('kill', command.id, command.name)"
-                        class="btn btn-danger btn-split"
-                        title="Termina processo"
-                    >
-                        <i class="fas fa-stop"></i>
-                        Stop
-                    </button>
-                </template>
-            </div>
         </div>
     `,
     data() {
@@ -71,17 +32,22 @@ const CommandCard = {
             placeholderIcon: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg'
         };
     },
-    computed: {
-        statusClass() {
-            return this.command.isRunning ? 'status-running' : 'status-stopped';
-        },
-        statusText() {
-            return this.command.isRunning ? 'RUNNING' : 'STOPPED';
-        }
-    },
     methods: {
         handleImageError(event) {
             event.target.src = this.placeholderIcon;
+        },
+        handleCardClick() {
+            if (this.command.isRunning) {
+                // Se running, fa focus
+                this.$emit('focus', this.command.pid, this.command.name);
+            } else {
+                // Se stopped, esegue
+                this.$emit('execute', this.command.id, this.command.name, this.command.requiresConfirmation);
+            }
+        },
+        handleStop() {
+            // Gestisce lo stop senza propagare il click alla card
+            this.$emit('kill', this.command.id, this.command.name);
         }
     },
     emits: ['execute', 'focus', 'kill']
