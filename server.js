@@ -70,14 +70,41 @@ function authenticate(req, res, next) {
 // Mappa per tracciare PID
 const runningApps = {};
 
-// Verifica se un processo esiste ancora
-function processExists(pid) {
-	try {
-		process.kill(pid, 0);
-		return true;
-	} catch (e) {
-		return false;
-	}
+// Verifica se un processo esiste ancora (Windows-compatible)
+// Cerca per PID e opzionalmente per nome processo
+function processExists(pid, processName = null) {
+	if (!pid || isNaN(pid)) return Promise.resolve(false);
+	
+	return new Promise((resolve) => {
+		// Prima prova per PID esatto
+		exec(`tasklist /FI "PID eq ${pid}" /NH`, (err, stdout, stderr) => {
+			if (err) {
+				resolve(false);
+				return;
+			}
+			
+			// Se il PID esiste, perfetto
+			if (stdout.includes(String(pid))) {
+				resolve(true);
+				return;
+			}
+			
+			// Se il PID non esiste MA abbiamo un nome processo, cerca per nome
+			// (il processo potrebbe essere stato ricreato con nuovo PID)
+			if (processName) {
+				exec(`tasklist /FI "IMAGENAME eq ${processName}.exe" /NH`, (err2, stdout2) => {
+					if (err2) {
+						resolve(false);
+						return;
+					}
+					// Se esiste un processo con quel nome, potrebbe essere quello giusto
+					resolve(stdout2.includes(`${processName}.exe`));
+				});
+			} else {
+				resolve(false);
+			}
+		});
+	});
 }
 
 // Esegue qualsiasi comando in background senza output
@@ -85,28 +112,77 @@ function runCommand(cmd) {
 	return new Promise((resolve, reject) => {
 		try {
 			logger.info(`Esecuzione comando: ${cmd.name} (${cmd.command})`);
-			const child = spawn(cmd.command, { 
-				shell: true, 
-				detached: true, 
-				stdio: 'ignore',
-				windowsHide: true,
-				cwd: __dirname  // Esegue dalla directory del server per script PowerShell
+			
+			// Se è un comando PowerShell script, usa exec per ottenere output
+			if (cmd.command.includes('powershell.exe') && cmd.command.includes('.ps1')) {
+				exec(cmd.command, { cwd: __dirname }, (err, stdout, stderr) => {
+					if (err) {
+						logger.error(`Errore esecuzione comando ${cmd.name}:`, stderr || err);
+						return reject(err);
+					}
+					
+					// Per script PowerShell, non possiamo tracciare PID facilmente
+					// Usiamo un PID fittizio
+					const fakePid = Date.now();
+					runningApps[cmd.id] = {
+						pid: fakePid,
+						name: cmd.name,
+						startTime: new Date(),
+						isScript: true
+					};
+					
+					logger.info(`Script ${cmd.name} eseguito`);
+					resolve(fakePid);
+				});
+				return;
+			}
+			
+			// Per comandi semplici, usa lo script PowerShell start-and-track-process.ps1
+			const scriptPath = path.join(__dirname, 'start-and-track-process.ps1');
+			const psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Command "${cmd.command}"`;
+			
+			exec(psCommand, { cwd: __dirname }, (err, stdout, stderr) => {
+				if (err) {
+					logger.error(`Errore esecuzione comando ${cmd.name}:`, stderr || err);
+					return reject(err);
+				}
+				
+				try {
+					const result = JSON.parse(stdout.trim());
+					
+					if (!result.success) {
+						logger.error(`Errore avvio comando ${cmd.name}: ${result.error || result.warning || 'Unknown'}`);
+						// Non rifiutare per warning, solo per errori
+						if (result.error) {
+							return reject(new Error(result.error));
+						}
+					}
+					
+					const pid = result.pid;
+					const initialPid = result.initialPid;
+					const processName = result.processName;
+					const windowTitle = result.windowTitle || null;
+					
+					runningApps[cmd.id] = {
+						pid: pid,
+						initialPid: initialPid,
+						processName: processName,
+						windowTitle: windowTitle,
+						name: cmd.name,
+						startTime: new Date()
+					};
+					
+					if (pid !== initialPid) {
+						logger.info(`Comando ${cmd.name} avviato - PID iniziale: ${initialPid}, PID finale: ${pid} (${processName}, finestra: ${windowTitle || 'N/A'})`);
+					} else {
+						logger.info(`Comando ${cmd.name} avviato con PID ${pid} (${processName}, finestra: ${windowTitle || 'N/A'})`);
+					}
+					resolve(pid);
+				} catch (parseError) {
+					logger.error(`Errore parsing JSON da comando ${cmd.name}:`, stdout);
+					return reject(parseError);
+				}
 			});
-			
-			child.on('error', (error) => {
-				logger.error(`Errore esecuzione comando ${cmd.name}:`, error);
-				reject(error);
-			});
-			
-			child.unref();
-			runningApps[cmd.id] = {
-				pid: child.pid,
-				name: cmd.name,
-				startTime: new Date()
-			};
-			
-			logger.info(`Comando ${cmd.name} avviato con PID ${child.pid}`);
-			resolve(child.pid);
 		} catch (error) {
 			logger.error(`Errore spawn comando ${cmd.name}:`, error);
 			reject(error);
@@ -122,33 +198,63 @@ function killCommand(id) {
 			return reject(new Error('Processo non in esecuzione'));
 		}
 		
-		const pid = appInfo.pid;
-		
-		// Verifica se il processo esiste ancora
-		if (!processExists(pid)) {
+		// Se è uno script, rimuovi solo il tracking (non c'è processo da killare)
+		if (appInfo.isScript) {
+			logger.info(`Rimozione tracking script ${appInfo.name}`);
 			delete runningApps[id];
-			return reject(new Error('Processo non più esistente'));
+			return resolve(true);
 		}
 		
-		logger.info(`Terminazione processo ${appInfo.name} (PID: ${pid})`);
+		const pid = appInfo.pid;
+		const processName = appInfo.processName;
 		
-		exec(`taskkill /PID ${pid} /T /F`, (err, stdout, stderr) => {
-			if (err) {
-				logger.error(`Errore terminazione processo ${pid}:`, err);
-				return reject(err);
+		// Verifica se il processo esiste ancora (cerca per PID o nome)
+		processExists(pid, processName).then(exists => {
+			if (!exists) {
+				delete runningApps[id];
+				return reject(new Error('Processo non più esistente'));
 			}
-			delete runningApps[id];
-			logger.info(`Processo ${appInfo.name} terminato con successo`);
-			resolve(true);
-		});
+			
+			logger.info(`Terminazione processo ${appInfo.name} (PID: ${pid}, Nome: ${processName})`);
+			
+			// Prova prima per PID, poi per nome se fallisce
+			exec(`taskkill /PID ${pid} /T /F`, (err, stdout, stderr) => {
+				if (err && processName) {
+					// Se taskkill per PID fallisce, prova per nome
+					logger.warn(`Taskkill per PID ${pid} fallito, provo per nome: ${processName}`);
+					exec(`taskkill /IM ${processName}.exe /T /F`, (err2, stdout2, stderr2) => {
+						if (err2) {
+							logger.error(`Errore terminazione processo ${processName}:`, err2);
+							return reject(err2);
+						}
+						delete runningApps[id];
+						logger.info(`Processo ${appInfo.name} terminato con successo (per nome)`);
+						resolve(true);
+					});
+				} else if (err) {
+					logger.error(`Errore terminazione processo ${pid}:`, err);
+					return reject(err);
+				} else {
+					delete runningApps[id];
+					logger.info(`Processo ${appInfo.name} terminato con successo`);
+					resolve(true);
+				}
+			});
+		}).catch(err => reject(err));
 	});
 }
 
 // Pulizia processi morti
-setInterval(() => {
+setInterval(async () => {
 	for (const [id, appInfo] of Object.entries(runningApps)) {
-		if (!processExists(appInfo.pid)) {
-			logger.info(`Processo ${appInfo.name} (PID: ${appInfo.pid}) non più attivo, rimozione dalla lista`);
+		// Skip script (non hanno PID reale da verificare)
+		if (appInfo.isScript) {
+			continue;
+		}
+		
+		const exists = await processExists(appInfo.pid, appInfo.processName);
+		if (!exists) {
+			logger.info(`Processo ${appInfo.name} (PID: ${appInfo.pid}, Nome: ${appInfo.processName}) non più attivo, rimozione dalla lista`);
 			delete runningApps[id];
 		}
 	}
@@ -224,15 +330,27 @@ app.post('/api/focus/:pid', authenticate, async (req, res) => {
 			return res.status(400).json({ success: false, error: 'PID non valido' });
 		}
 		
-		// Verifica se il processo esiste
-		if (!processExists(pid)) {
-			return res.status(404).json({ success: false, error: 'Processo non trovato' });
+	// Cerca il processo name nei runningApps
+	let processName = null;
+	let windowTitle = null;
+	for (const appInfo of Object.values(runningApps)) {
+		if (appInfo.pid === pid) {
+			processName = appInfo.processName;
+			windowTitle = appInfo.windowTitle;
+			break;
 		}
-		
-		logger.info(`Tentativo focus finestra PID: ${pid}`);
-		const scriptPath = path.join(__dirname, 'focus-window-by-pid.ps1');
-		
-		exec(`powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -PID ${pid}`, (err, stdout, stderr) => {
+	}
+	
+	logger.info(`Tentativo focus finestra PID: ${pid}${processName ? `, Nome: ${processName}` : ''}${windowTitle ? `, Titolo: ${windowTitle}` : ''}`);
+	const scriptPath = path.join(__dirname, 'focus-window-by-pid.ps1');
+	
+	// Passa window title se disponibile (per UWP apps), altrimenti nome processo
+	let psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -ProcessPid ${pid}`;
+	if (windowTitle) {
+		psCommand += ` -WindowTitle "${windowTitle}"`;
+	} else if (processName) {
+		psCommand += ` -ProcessName "${processName}"`;
+	}		exec(psCommand, (err, stdout, stderr) => {
 			if (err) {
 				logger.error(`Errore focus finestra PID ${pid}:`, stderr);
 				return res.status(500).json({ 
@@ -270,12 +388,18 @@ app.post('/api/commands/:id', authenticate, async (req, res) => {
 		}
 		
 		// Verifica se è già in esecuzione
-		if (runningApps[cmdId] && processExists(runningApps[cmdId].pid)) {
-			return res.status(409).json({ 
-				success: false, 
-				error: 'Comando già in esecuzione',
-				pid: runningApps[cmdId].pid
-			});
+		if (runningApps[cmdId]) {
+			const exists = await processExists(runningApps[cmdId].pid);
+			if (exists) {
+				return res.status(409).json({ 
+					success: false, 
+					error: 'Comando già in esecuzione',
+					pid: runningApps[cmdId].pid
+				});
+			} else {
+				// Processo morto, rimuovi dal tracking
+				delete runningApps[cmdId];
+			}
 		}
 		
 		const pid = await runCommand(cmd);

@@ -1,9 +1,15 @@
 # Script PowerShell per portare una finestra in primo piano tramite PID
-# Uso: .\focus-window-by-pid.ps1 -PID 12345
+# Uso: .\focus-window-by-pid.ps1 -ProcessPid 12345 [-ProcessName "Calculator"] [-WindowTitle "Calculator"]
 
 param(
     [Parameter(Mandatory=$true)]
-    [int]$PID
+    [int]$ProcessPid,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$ProcessName,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$WindowTitle
 )
 
 Add-Type @"
@@ -23,36 +29,79 @@ Add-Type @"
   }
 "@
 
-try {
-    # Ottieni il processo tramite PID
-    $process = Get-Process -Id $PID -ErrorAction Stop
-    
-    if ($process) {
-        $hwnd = $process.MainWindowHandle
+function Try-FocusProcess($proc) {
+    if ($proc -and $proc.MainWindowHandle -ne [IntPtr]::Zero) {
+        # Ripristina la finestra se minimizzata
+        [Win32]::ShowWindow($proc.MainWindowHandle, [Win32]::SW_RESTORE) | Out-Null
+        Start-Sleep -Milliseconds 100
         
-        if ($hwnd -ne [IntPtr]::Zero) {
-            # Ripristina la finestra se minimizzata
-            [Win32]::ShowWindow($hwnd, [Win32]::SW_RESTORE) | Out-Null
-            Start-Sleep -Milliseconds 100
-            
-            # Porta in primo piano
-            $result = [Win32]::SetForegroundWindow($hwnd)
-            
-            if ($result) {
-                Write-Host "Finestra '$($process.MainWindowTitle)' (PID: $PID) portata in primo piano" -ForegroundColor Green
-                exit 0
-            } else {
-                Write-Host "Impossibile portare in primo piano (PID: $PID)" -ForegroundColor Yellow
-                exit 1
-            }
-        } else {
-            Write-Host "Processo PID $PID non ha una finestra principale" -ForegroundColor Yellow
-            Write-Host "Nome processo: $($process.ProcessName)" -ForegroundColor Gray
-            exit 1
+        # Porta in primo piano
+        $result = [Win32]::SetForegroundWindow($proc.MainWindowHandle)
+        
+        if ($result) {
+            Write-Host "Finestra '$($proc.MainWindowTitle)' (PID: $($proc.Id)) portata in primo piano" -ForegroundColor Green
+            return $true
         }
     }
+    return $false
+}
+
+try {
+    # Prova prima con il PID esatto
+    $process = Get-Process -Id $ProcessPid -ErrorAction SilentlyContinue
+    
+    if (Try-FocusProcess $process) {
+        exit 0
+    }
+    
+    # Se il PID non funziona MA abbiamo un WindowTitle, cerca per titolo
+    if ($WindowTitle) {
+        Write-Host "PID $ProcessPid non trovato o senza finestra, cerco per titolo: $WindowTitle" -ForegroundColor Yellow
+        
+        # Cerca processi con finestra che contengono il titolo
+        $processes = Get-Process | Where-Object { 
+            $_.MainWindowHandle -ne 0 -and $_.MainWindowTitle -like "*$WindowTitle*"
+        }
+        
+        if ($processes) {
+            # Prendi il primo match
+            $process = $processes | Select-Object -First 1
+            
+            if (Try-FocusProcess $process) {
+                exit 0
+            }
+        }
+    }
+    
+    # Se abbiamo solo ProcessName (fallback)
+    if ($ProcessName -and -not $WindowTitle) {
+        Write-Host "PID $ProcessPid non trovato, cerco per nome: $ProcessName" -ForegroundColor Yellow
+        
+        # Cerca tutti i processi con quel nome
+        $processes = Get-Process -Name $ProcessName -ErrorAction SilentlyContinue | 
+                     Where-Object { $_.MainWindowHandle -ne 0 }
+        
+        if ($processes) {
+            # Prendi il primo con finestra
+            $process = $processes | Select-Object -First 1
+            
+            if (Try-FocusProcess $process) {
+                exit 0
+            }
+        }
+    }
+    
+    # Se arriviamo qui, nessun metodo ha funzionato
+    if ($WindowTitle) {
+        Write-Host "Finestra con titolo '$WindowTitle' non trovata" -ForegroundColor Yellow
+    } elseif ($ProcessName) {
+        Write-Host "Processo PID $ProcessPid o nome $ProcessName non ha una finestra principale" -ForegroundColor Yellow
+    } else {
+        Write-Host "Processo PID $ProcessPid non ha una finestra principale" -ForegroundColor Yellow
+    }
+    exit 1
+    
 } catch {
-    Write-Host "Errore: Processo con PID $PID non trovato" -ForegroundColor Red
-    Write-Host "Dettagli: $_" -ForegroundColor Gray
+    Write-Host "Errore: $_" -ForegroundColor Red
     exit 1
 }
