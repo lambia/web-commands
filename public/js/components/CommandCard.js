@@ -33,40 +33,42 @@ const CommandCard = {
 
             <!-- Warning per comandi critici -->
             <div v-if="command.requiresConfirmation && !command.isRunning" class="command-warning">
-                ⚠️ Richiede conferma
+                <i class="fas fa-exclamation-triangle"></i> Richiede conferma
             </div>
 
             <!-- Actions -->
             <div class="command-actions">
+                <!-- Pulsante Esegui - visibile solo se NON in esecuzione -->
                 <button 
+                    v-if="!command.isRunning"
                     @click="$emit('execute', command.id, command.name, command.requiresConfirmation)"
-                    :disabled="command.isRunning"
-                    class="btn btn-primary"
-                    :title="command.isRunning ? 'Già in esecuzione' : 'Esegui comando'"
+                    class="btn btn-primary btn-execute"
+                    title="Esegui comando"
                 >
-                    <span class="btn-icon">▶</span>
+                    <i class="fas fa-play"></i>
                     Esegui
                 </button>
 
-                <button 
-                    @click="$emit('focus', command.pid, command.name)"
-                    :disabled="!command.isRunning"
-                    class="btn btn-focus"
-                    title="Porta in primo piano"
-                >
-                    <span class="btn-icon">🔍</span>
-                    Focus
-                </button>
+                <!-- Pulsanti Focus e Stop - visibili solo se in esecuzione -->
+                <template v-if="command.isRunning">
+                    <button 
+                        @click="$emit('focus', command.pid, command.name)"
+                        class="btn btn-focus btn-split"
+                        title="Porta in primo piano"
+                    >
+                        <i class="fas fa-eye"></i>
+                        Focus
+                    </button>
 
-                <button 
-                    @click="$emit('kill', command.id, command.name)"
-                    :disabled="!command.isRunning"
-                    class="btn btn-danger"
-                    title="Termina processo"
-                >
-                    <span class="btn-icon">⏹</span>
-                    Stop
-                </button>
+                    <button 
+                        @click="$emit('kill', command.id, command.name)"
+                        class="btn btn-danger btn-split"
+                        title="Termina processo"
+                    >
+                        <i class="fas fa-stop"></i>
+                        Stop
+                    </button>
+                </template>
             </div>
         </div>
     `,

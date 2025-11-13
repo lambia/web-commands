@@ -214,6 +214,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
+    justify-items: center;
 }
 
 .stat-card {
@@ -221,6 +222,8 @@ body {
     padding: 15px;
     background: #f7fafc;
     border-radius: 10px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .stat-value {
@@ -349,10 +352,25 @@ body {
 }
 
 .command-actions .btn {
-    flex: 1;
-    min-width: 90px;
     padding: 10px 12px;
     font-size: 0.9rem;
+}
+
+/* Pulsante Esegui - larghezza piena */
+.command-actions .btn-execute {
+    flex: 1;
+    width: 100%;
+}
+
+/* Pulsanti Focus e Stop - dividono lo spazio equamente */
+.command-actions .btn-split {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Rimuovi icone emoji, usiamo Font Awesome */
+.btn-icon {
+    display: none;
 }
 
 /* ==================== RESPONSIVE ==================== */

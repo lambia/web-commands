@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Commands - Control Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
     <div id="app">
         <header class="app-header">
-            <h1>🎮 Web Commands</h1>
+            <h1><i class="fas fa-gamepad"></i> Web Commands</h1>
             <p class="subtitle">Control Panel per comandi Windows</p>
         </header>
 
@@ -25,9 +26,12 @@
                         @keypress.enter="authenticate"
                         class="api-key-input"
                     >
-                    <button @click="authenticate" class="btn btn-primary">Connetti</button>
+                    <button @click="authenticate" class="btn btn-primary">
+                        <i class="fas fa-plug"></i>
+                        Connetti
+                    </button>
                 </div>
-                <p class="hint">💡 API Key configurata in config.json</p>
+                <p class="hint"><i class="fas fa-lightbulb"></i> API Key configurata in config.json</p>
             </div>
         </section>
 
@@ -45,21 +49,11 @@
             </transition-group>
 
             <!-- Statistiche -->
-            <section class="stats-section">
+            <section class="stats-section" v-if="runningCount > 0">
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">{{ commands.length }}</div>
-                        <div class="stat-label">Comandi Totali</div>
-                    </div>
                     <div class="stat-card">
                         <div class="stat-value">{{ runningCount }}</div>
                         <div class="stat-label">In Esecuzione</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">
-                            <span :class="['status-indicator', serverOnline ? 'status-online' : 'status-offline']"></span>
-                        </div>
-                        <div class="stat-label">Stato Server</div>
                     </div>
                 </div>
             </section>
