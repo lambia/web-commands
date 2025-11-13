@@ -180,10 +180,19 @@ const app = createApp({
                 const data = await response.json();
 
                 if (data.success) {
-                    this.showAlert(`✅ ${name} avviato con successo (PID: ${data.pid})`, 'success');
+                    // Gestisci caso tracciato vs non tracciato
+                    if (data.tracked === false || data.pid === null) {
+                        this.showAlert(`✅ ${name} avviato (non tracciato)`, 'success');
+                    } else {
+                        this.showAlert(`✅ ${name} avviato con successo (PID: ${data.pid})`, 'success');
+                    }
                     await this.loadCommands();
                 } else {
-                    this.showAlert(`❌ ${data.error}`, 'error');
+                    // Mostra errore con dettagli se disponibili
+                    const errorMsg = data.details 
+                        ? `${data.error}: ${data.details}` 
+                        : data.error;
+                    this.showAlert(`❌ ${errorMsg}`, 'error');
                 }
             } catch (error) {
                 this.showAlert(`❌ Errore esecuzione: ${error.message}`, 'error');
@@ -206,7 +215,8 @@ const app = createApp({
                 if (data.success) {
                     this.showAlert(`✅ ${name} portato in primo piano`, 'success');
                 } else {
-                    this.showAlert(`❌ ${data.error}`, 'error');
+                    const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error;
+                    this.showAlert(`❌ ${errorMsg}`, 'error');
                 }
             } catch (error) {
                 this.showAlert(`❌ Errore focus: ${error.message}`, 'error');
@@ -229,7 +239,8 @@ const app = createApp({
                     this.showAlert(`✅ ${name} terminato con successo`, 'success');
                     await this.loadCommands();
                 } else {
-                    this.showAlert(`❌ ${data.error}`, 'error');
+                    const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error;
+                    this.showAlert(`❌ ${errorMsg}`, 'error');
                 }
             } catch (error) {
                 this.showAlert(`❌ Errore terminazione: ${error.message}`, 'error');
