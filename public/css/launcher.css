@@ -189,6 +189,7 @@ body {
     position: relative;
     cursor: pointer;
     transition: all 200ms;
+    text-decoration: none;
 }
 
 .appCard:focus,

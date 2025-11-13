@@ -2,129 +2,9 @@
   "port": 3000,
   "corsOrigins": ["http://localhost:3000"],
   "commands": [
-    { 
-      "id": 1, 
-      "name": "Shutdown", 
-      "command": "shutdown /s /t 0",
-      "requiresConfirmation": true,
-      "tile": {
-        "style": {
-          "backgroundColor": "#dc2626",
-          "color": "#FFFFFF"
-        },
-        "class": "card-padding-thin"
-      },
-      "text": {
-        "name": "Shutdown",
-        "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-power-off text-7"
-      }
-    },
-    { 
-      "id": 2, 
-      "name": "Sleep", 
-      "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
-      "requiresConfirmation": true,
-      "tile": {
-        "style": {
-          "backgroundColor": "#1e40af",
-          "color": "#FFFFFF"
-        },
-        "class": "card-padding-thin"
-      },
-      "text": {
-        "name": "Sleep",
-        "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-moon text-7"
-      }
-    },
-    { 
-      "id": 3, 
-      "name": "Hibernate", 
-      "command": "shutdown /h",
-      "requiresConfirmation": true,
-      "tile": {
-        "style": {
-          "backgroundColor": "#7c3aed",
-          "color": "#FFFFFF"
-        },
-        "class": "card-padding-thin"
-      },
-      "text": {
-        "name": "Hibernate",
-        "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-bed text-7"
-      }
-    },
-    { 
-      "id": 4, 
-      "name": "Notepad", 
-      "command": "notepad",
-      "requiresConfirmation": false,
-      "tile": {
-        "style": {
-          "backgroundColor": "#059669",
-          "color": "#FFFFFF"
-        },
-        "class": "card-padding-thin"
-      },
-      "text": {
-        "name": "Notepad",
-        "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-file-alt text-7"
-      }
-    },
-    { 
-      "id": 5, 
-      "name": "Calculator", 
-      "command": "calc",
-      "requiresConfirmation": false,
-      "tile": {
-        "style": {
-          "backgroundColor": "#ea580c",
-          "color": "#FFFFFF"
-        },
-        "class": "card-padding-thin"
-      },
-      "text": {
-        "name": "Calculator",
-        "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-calculator text-7"
-      }
-    },
-    { 
-      "id": 6, 
-      "name": "Paint", 
-      "command": "mspaint",
-      "requiresConfirmation": false,
-      "tile": {
-        "style": {
-          "backgroundColor": "#db2777",
-          "color": "#FFFFFF"
-        },
-        "class": "card-padding-thin"
-      },
-      "text": {
-        "name": "Paint",
-        "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-palette text-7"
-      }
-    },
     {
-      "id": 7,
-      "name": "Streaming Unity",
+      "id": 1,
+      "name": "Streaming Community",
       "command": "",
       "requiresConfirmation": false,
       "tile": {
@@ -132,7 +12,27 @@
           "backgroundColor": "#000000",
           "color": "#FFFFFF"
         },
-        "href": "https://streamingunity.co/",
+        "href": "https://streamingcommunity.support/",
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Streaming Community",
+        "class": "text-3"
+      },
+      "icon": {
+        "class": "fa-solid fa-play-circle text-7"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Stremio",
+      "command": "%USERPROFILE%\\AppData\\Local\\Programs\\Stremio\\Stremio.exe",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#000000",
+          "color": "#FFFFFF"
+        },
         "class": "card-padding-thin"
       },
       "img": {
@@ -140,11 +40,32 @@
         "class": "card-img-contain card-img-light"
       },
       "text": {
-        "name": "Streaming Unity"
+        "name": "Stremio"
       }
     },
     {
-      "id": 8,
+      "id": 3,
+      "name": "Steam",
+      "command": "\"C:\\Program Files (x86)\\Steam\\Steam.exe\" -bigpicture",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "background": "linear-gradient(0deg,rgba(3, 112, 164, 1) 0%, rgba(19, 52, 98, 1) 60%, rgba(20, 28, 52, 1) 95%)",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Steam",
+        "class": "text-4"
+      },
+      "img": {
+        "src": "./icons/steam.svg",
+        "class": "card-img-contain card-img-light"
+      }
+    },
+    {
+      "id": 4,
       "name": "Disney+",
       "command": "",
       "requiresConfirmation": false,
@@ -165,7 +86,7 @@
       }
     },
     {
-      "id": 9,
+      "id": 5,
       "name": "Netflix",
       "command": "",
       "requiresConfirmation": false,
@@ -186,7 +107,7 @@
       }
     },
     {
-      "id": 10,
+      "id": 6,
       "name": "Now TV",
       "command": "",
       "requiresConfirmation": false,
@@ -207,7 +128,7 @@
       }
     },
     {
-      "id": 11,
+      "id": 7,
       "name": "Prime Video",
       "command": "",
       "requiresConfirmation": false,
@@ -228,16 +149,15 @@
       }
     },
     {
-      "id": 12,
+      "id": 8,
       "name": "Spotify",
-      "command": "",
+      "command": "C:\\Program Files\\WindowsApps\\SpotifyAB.SpotifyMusic_<versione>_x64__zpdnekdrzrea0\\Spotify.exe",
       "requiresConfirmation": false,
       "tile": {
         "style": {
           "backgroundColor": "#1DB954",
           "color": "#FFFFFF"
         },
-        "href": "https://open.spotify.com/",
         "class": "card-padding-thin"
       },
       "img": {
@@ -249,7 +169,7 @@
       }
     },
     {
-      "id": 13,
+      "id": 9,
       "name": "YouTube",
       "command": "",
       "requiresConfirmation": false,
@@ -270,7 +190,7 @@
       }
     },
     {
-      "id": 14,
+      "id": 10,
       "name": "Google",
       "command": "",
       "requiresConfirmation": false,
@@ -288,6 +208,86 @@
       },
       "text": {
         "name": "Google"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Settings",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#6b7280",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Settings",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-cog text-7"
+      }
+    },
+    { 
+      "id": 12, 
+      "name": "Sleep", 
+      "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
+      "requiresConfirmation": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#1e40af",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Sleep",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-moon text-7"
+      }
+    },
+    { 
+      "id": 13, 
+      "name": "Hibernate", 
+      "command": "shutdown /h",
+      "requiresConfirmation": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#7c3aed",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Hibernate",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-bed text-7"
+      }
+    },
+    { 
+      "id": 14, 
+      "name": "Shutdown", 
+      "command": "shutdown /s /t 0",
+      "requiresConfirmation": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#dc2626",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Shutdown",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-power-off text-7"
       }
     }
   ]

@@ -356,7 +356,51 @@ I log vengono stampati sulla console in tempo reale.
 
 
 
-Tutti gli endpoint richiedono l'header `X-API-Key` con la chiave configurata.## 🛠️ Personalizzazione
+Tutti gli endpoint richiedono l'header `X-API-Key` con la chiave configurata.## � Apps
+
+### Percorsi Applicazioni
+
+#### Spotify
+
+Spotify può essere installato in diverse posizioni a seconda del metodo di installazione:
+
+1. **Microsoft Store (UWP)** - Raccomandata
+   ```
+   C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_<versione>_x64__zpdnekdrzrea0\Spotify.exe
+   ```
+
+2. **Installer Classico (Win32)**
+   ```
+   C:\Users\<nome_utente>\AppData\Roaming\Spotify\Spotify.exe
+   ```
+
+3. **Spotify Web**
+   ```
+   https://open.spotify.com/
+   ```
+
+#### Stremio
+
+Stremio può essere trovato in uno dei seguenti percorsi:
+
+1. **Installazione Program Files**
+   ```
+   C:\Program Files\Stremio\Stremio.exe
+   ```
+
+2. **Installazione LNV (AppData)**
+   ```
+   C:\Users\<nome_utente>\AppData\Local\Programs\LNV\Stremio\Stremio.exe
+   ```
+
+3. **Installazione Standard (AppData)**
+   ```
+   C:\Users\<nome_utente>\AppData\Local\Programs\Stremio\Stremio.exe
+   ```
+
+> **Nota:** Sostituisci `<nome_utente>` con il nome del tuo utente Windows e `<versione>` con il numero di versione effettivo dell'app.
+
+## �🛠️ Personalizzazione
 
 
 
