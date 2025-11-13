@@ -19,62 +19,57 @@ try {
         $_.MainWindowHandle -ne 0 -and 
         $_.MainWindowTitle -ne "" 
     } | ForEach-Object {
-        $currentProcess = $_
-        
         # Ottieni path eseguibile (può fallire per processi system)
         $exePath = ""
         try {
-            $exePath = $currentProcess.Path
+            $exePath = $_.Path
         } catch {
             $exePath = ""
         }
         
-        # Escape caratteri speciali nel titolo (rimuove caratteri di controllo)
-        $cleanTitle = $currentProcess.MainWindowTitle -replace '[\x00-\x1F\x7F]', ''
-        
-        # Se è ApplicationFrameHost, cerca processi UWP correlati per window title
-        $relatedProcesses = @()
-        if ($currentProcess.ProcessName -eq "ApplicationFrameHost") {
-            try {
-                # Cerca processi il cui nome è simile al window title
-                # Es: window title "Calculator" -> cerca processi con nome "Calculator*"
-                $titleWords = $cleanTitle -split '\s+' | Where-Object { $_.Length -gt 3 }
-                
-                foreach ($word in $titleWords) {
-                    $matchingProcs = Get-Process | Where-Object { 
-                        $_.ProcessName -like "*$word*" -and 
-                        $_.Id -ne $currentProcess.Id
-                    }
-                    
-                    foreach ($proc in $matchingProcs) {
-                        $procPath = ""
-                        try { $procPath = $proc.Path } catch { }
-                        
-                        $relatedProcesses += [PSCustomObject]@{
-                            name = $proc.ProcessName
-                            path = $procPath
-                        }
-                    }
+        # Rimuovi caratteri di controllo e problematici dal titolo
+        $current = $_
+        $cleanTitle = $current.MainWindowTitle
+        # Rimuove caratteri ASCII di controllo (0x00-0x1F) e DEL (0x7F)
+        $cleanTitle = $cleanTitle -replace '[\x00-\x1F\x7F]+', ''
+        # Rimuove anche altri caratteri problematici per JSON
+        $cleanTitle = $cleanTitle -replace '[\r\n\t]', ' '
+        $cleanTitle = $cleanTitle.Trim()
+
+        # Raccogli processi figli (se presenti) con pid, nome e path
+        $childProcesses = @()
+        try {
+            $children = Get-CimInstance Win32_Process | Where-Object { $_.ParentProcessId -eq $current.Id }
+            foreach ($ch in $children) {
+                $chPath = ''
+                try { $chPath = $ch.ExecutablePath } catch { $chPath = '' }
+                $childProcesses += [PSCustomObject]@{
+                    pid = $ch.ProcessId
+                    name = ($ch.Name -replace '\.exe$', '')
+                    path = $chPath
                 }
-            } catch {
-                # Ignora errori
             }
+        } catch {
+            # ignore
         }
-        
+
         [PSCustomObject]@{
-            process = $currentProcess.ProcessName
+            process = $current.ProcessName
             title = $cleanTitle
-            pid = $currentProcess.Id
+            pid = $current.Id
             path = $exePath
-            relatedProcesses = $relatedProcesses
+            children = $childProcesses
         }
     }
     
-    # Output come JSON (usa -Depth per evitare troncamenti)
+    # Output come JSON
     if ($windows) {
-        $windows | ConvertTo-Json -Compress -Depth 5
+        $json = $windows | ConvertTo-Json -Compress -Depth 3
+        # Ulteriore pulizia del JSON per sicurezza
+        $json = $json -replace '[\x00-\x1F\x7F]', ''
+        Write-Output $json
     } else {
-        "[]"
+        Write-Output "[]"
     }
     exit 0
 } catch {

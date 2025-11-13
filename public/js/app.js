@@ -103,6 +103,7 @@ const app = createApp({
                         const runningWindow = data.windows.find(win => {
                             const processName = win.process.toLowerCase();
                             const processPath = (win.path || '').toLowerCase();
+                            const windowTitle = (win.title || '').toLowerCase();
                             
                             // Estrae nome eseguibile dal path della finestra
                             let windowExecutable = '';
@@ -134,32 +135,36 @@ const app = createApp({
                                 return true;
                             }
                             
-                            // 5. Match per UWP apps: verifica processi correlati (es: ApplicationFrameHost -> CalculatorApp)
-                            if (processName === 'applicationframehost' && Array.isArray(win.relatedProcesses)) {
-                                for (const relatedProc of win.relatedProcesses) {
-                                    const relatedName = relatedProc.name.toLowerCase();
-                                    const relatedPath = (relatedProc.path || '').toLowerCase();
-                                    
-                                    // Estrae eseguibile dal path del processo correlato
-                                    let relatedExecutable = relatedName.replace(/\.exe$/, '');
-                                    if (relatedPath) {
-                                        relatedExecutable = relatedPath.split(/[/\\]/).pop().replace(/\.exe$/, '');
-                                    }
-                                    
-                                    // Match esatto o parziale con processo correlato
-                                    if (relatedName.includes(cmdExecutableNoExt) || relatedExecutable.includes(cmdExecutableNoExt)) {
-                                        console.log(`✅ Match UWP related process: "${cmdExecutableNoExt}" found in "${relatedName}"`);
-                                        return true;
-                                    }
-                                }
+                            // 5. Match per UWP apps: verifica se window title contiene il command
+                            // Es: command "calc" -> window title "Calculator"
+                            if (processName === 'applicationframehost' && windowTitle.includes(cmdExecutableNoExt)) {
+                                console.log(`✅ Match UWP title: "${cmdExecutableNoExt}" found in "${windowTitle}"`);
+                                return true;
                             }
                             
                             return false;
                         });
                         
-                        // Se trovato, adotta il processo
+                        // Se trovato, adotta il processo (preferisci pid del child se disponibile)
                         if (runningWindow) {
-                            await this.adoptProcess(cmd.id, runningWindow);
+                            let adoptPid = runningWindow.pid;
+                            let adoptProcessName = runningWindow.process;
+
+                            if (Array.isArray(runningWindow.children) && runningWindow.children.length > 0) {
+                                const childMatch = runningWindow.children.find(c => {
+                                    const childName = (c.name || '').toLowerCase();
+                                    const childPath = (c.path || '').toLowerCase();
+                                    return childName.includes(cmdExecutableNoExt) || childPath.includes(cmdExecutableNoExt);
+                                });
+
+                                if (childMatch) {
+                                    adoptPid = childMatch.pid;
+                                    adoptProcessName = childMatch.name || adoptProcessName;
+                                    console.log(`🔎 Using child PID ${adoptPid} (${adoptProcessName}) for command ${cmd.name}`);
+                                }
+                            }
+
+                            await this.adoptProcess(cmd.id, { pid: adoptPid, process: adoptProcessName, title: runningWindow.title });
                         }
                     }
                     
