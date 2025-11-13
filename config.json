@@ -6,43 +6,289 @@
       "id": 1, 
       "name": "Shutdown", 
       "command": "shutdown /s /t 0",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": true
+      "requiresConfirmation": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#dc2626",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Shutdown",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-power-off text-7"
+      }
     },
     { 
       "id": 2, 
       "name": "Sleep", 
       "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": true
+      "requiresConfirmation": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#1e40af",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Sleep",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-moon text-7"
+      }
     },
     { 
       "id": 3, 
       "name": "Hibernate", 
       "command": "shutdown /h",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": true
+      "requiresConfirmation": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#7c3aed",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Hibernate",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-bed text-7"
+      }
     },
     { 
       "id": 4, 
       "name": "Notepad", 
       "command": "notepad",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": false
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#059669",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Notepad",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-file-alt text-7"
+      }
     },
     { 
       "id": 5, 
       "name": "Calculator", 
       "command": "calc",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": false
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#ea580c",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Calculator",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-calculator text-7"
+      }
     },
     { 
       "id": 6, 
       "name": "Paint", 
       "command": "mspaint",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": false
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#db2777",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Paint",
+        "class": "text-4"
+      },
+      "icon": {
+        "class": "fa-solid fa-palette text-7"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Streaming Unity",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#000000",
+          "color": "#FFFFFF"
+        },
+        "href": "https://streamingunity.co/",
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/jack-rackham.svg",
+        "class": "card-img-contain card-img-light"
+      },
+      "text": {
+        "name": "Streaming Unity"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Disney+",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#020C6F",
+          "color": "#FFFFFF"
+        },
+        "href": "https://www.disneyplus.com/it-it/home",
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/disney-plus.svg",
+        "class": "card-img-contain card-img-light"
+      },
+      "text": {
+        "name": "Disney+"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Netflix",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#000000",
+          "color": "#FFFFFF"
+        },
+        "href": "https://netflix.com/",
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/netflix.svg",
+        "class": "card-img-contain"
+      },
+      "text": {
+        "name": "Netflix"
+      }
+    },
+    {
+      "id": 10,
+      "name": "Now TV",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#00818A",
+          "color": "#FFFFFF"
+        },
+        "href": "https://www.nowtv.it/",
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/now-tv.svg",
+        "class": "card-img-contain card-img-light"
+      },
+      "text": {
+        "name": "Now TV"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Prime Video",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#00A8E1",
+          "color": "#FFFFFF"
+        },
+        "href": "https://www.primevideo.com/",
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/prime-video.svg",
+        "class": "card-img-contain card-img-light"
+      },
+      "text": {
+        "name": "Prime Video"
+      }
+    },
+    {
+      "id": 12,
+      "name": "Spotify",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#1DB954",
+          "color": "#FFFFFF"
+        },
+        "href": "https://open.spotify.com/",
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/spotify.svg",
+        "class": "card-img-contain card-img-light"
+      },
+      "text": {
+        "name": "Spotify"
+      }
+    },
+    {
+      "id": 13,
+      "name": "YouTube",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#FF0000",
+          "color": "#FFFFFF"
+        },
+        "href": "https://youtube.com/",
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/youtube.svg",
+        "class": "card-img-contain"
+      },
+      "text": {
+        "name": "Youtube"
+      }
+    },
+    {
+      "id": 14,
+      "name": "Google",
+      "command": "",
+      "requiresConfirmation": false,
+      "tile": {
+        "style": {
+          "backgroundColor": "#FFFFFF",
+          "color": "#000000"
+        },
+        "href": "https://www.google.it",
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/google.svg",
+        "class": "card-img-contain"
+      },
+      "text": {
+        "name": "Google"
+      }
     }
   ]
 }

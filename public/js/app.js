@@ -9,6 +9,7 @@ const app = createApp({
             serverOnline: false,
             alerts: [],
             alertIdCounter: 0,
+            searchString: '',
             
             // Config
             apiBase: '/api',
@@ -18,9 +19,25 @@ const app = createApp({
     computed: {
         runningCount() {
             return this.commands.filter(cmd => cmd.isRunning).length;
+        },
+        filteredCommands() {
+            if (!this.searchString || this.searchString.trim() === '') {
+                return this.commands;
+            }
+            
+            const search = this.searchString.toLowerCase();
+            return this.commands.filter(cmd => 
+                cmd.name.toLowerCase().includes(search) ||
+                (cmd.command && cmd.command.toLowerCase().includes(search))
+            );
         }
     },
     methods: {
+        // ==================== FILTER ====================
+        filterCommands() {
+            // La filtrazione è gestita dal computed filteredCommands
+            // Questo metodo esiste per eventuali azioni aggiuntive
+        },
         // ==================== API CALLS ====================
         async loadCommands() {
             try {

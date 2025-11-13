@@ -3,54 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Commands - Control Panel</title>
+    <title>Web Commands</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/launcher.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">
-        <header class="app-header">
-            <h1><i class="fas fa-gamepad"></i> Web Commands</h1>
-            <p class="subtitle">Control Panel per comandi Windows</p>
-        </header>
+        <!-- Alert Messages -->
+        <transition-group name="alert-slide" tag="div" class="alert-container">
+            <div 
+                v-for="alert in alerts" 
+                :key="alert.id"
+                :class="['alert', `alert-${alert.type}`]"
+            >
+                {{ alert.message }}
+            </div>
+        </transition-group>
 
-        <!-- Contenuto Principale -->
-        <main class="main-content">
-            <!-- Alert Messages -->
-            <transition-group name="alert-slide" tag="div" class="alert-container">
-                <div 
-                    v-for="alert in alerts" 
-                    :key="alert.id"
-                    :class="['alert', `alert-${alert.type}`]"
+        <div id="appContainer">
+            <header class="app-header">
+                <h1><i class="fas fa-terminal"></i> Web Commands</h1>
+                <p class="subtitle">Control Panel</p>
+            </header>
+
+            <!-- Search Bar (temporaneamente disabilitata) -->
+            <!-- <header class="appSearchBar">
+                <input 
+                    type="text" 
+                    placeholder="Search commands..." 
+                    v-model="searchString"
+                    @input="filterCommands"
                 >
-                    {{ alert.message }}
-                </div>
-            </transition-group>
+            </header> -->
 
-            <!-- Statistiche -->
+            <!-- Stats -->
             <section class="stats-section" v-if="runningCount > 0">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">{{ runningCount }}</div>
-                        <div class="stat-label">In Esecuzione</div>
-                    </div>
-                </div>
+                <span class="stat-value">{{ runningCount }}</span> command{{ runningCount > 1 ? 's' : '' }} running
             </section>
 
-            <!-- Griglia Comandi -->
-            <section class="commands-section">
-                <div class="commands-grid">
-                    <command-card
-                        v-for="cmd in commands"
-                        :key="cmd.id"
-                        :command="cmd"
-                        @execute="executeCommand"
-                        @focus="focusWindow"
-                        @kill="killCommand"
-                    ></command-card>
-                </div>
-            </section>
-        </main>
+            <!-- Command Grid -->
+            <main class="appCardGrid">
+                <command-card
+                    v-for="cmd in commands"
+                    :key="cmd.id"
+                    :command="cmd"
+                    @execute="executeCommand"
+                    @focus="focusWindow"
+                    @kill="killCommand"
+                ></command-card>
+            </main>
+        </div>
     </div>
 
     <!-- Vue 3 -->
