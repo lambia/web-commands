@@ -27,7 +27,7 @@
     {
       "id": 2,
       "name": "Stremio",
-      "command": "%USERPROFILE%\\AppData\\Local\\Programs\\Stremio\\Stremio.exe",
+      "command": "%USERPROFILE%\\AppData\\Local\\Programs\\Stremio\\stremio-shell-ng.exe",
       "requiresConfirmation": false,
       "visible": true,
       "tile": {
@@ -48,7 +48,7 @@
     {
       "id": 3,
       "name": "Steam",
-      "command": "\"C:\\Program Files (x86)\\Steam\\Steam.exe\" -bigpicture",
+      "command": "steam://open/bigpicture",
       "requiresConfirmation": false,
       "visible": true,
       "tile": {
@@ -158,7 +158,7 @@
     {
       "id": 8,
       "name": "Spotify",
-      "command": "C:\\Program Files\\WindowsApps\\SpotifyAB.SpotifyMusic_<versione>_x64__zpdnekdrzrea0\\Spotify.exe",
+      "command": "shell:AppsFolder\\SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify",
       "requiresConfirmation": false,
       "visible": true,
       "tile": {
