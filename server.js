@@ -130,6 +130,7 @@ function runCommand(cmd) {
 			
 			// Salva finestre esistenti PRIMA del lancio
 			exec('powershell.exe -Command "Get-Process | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object Id, MainWindowTitle, ProcessName | ConvertTo-Json"', 
+				{ windowsHide: true },
 				(err, stdout) => {
 					const existingWindows = err ? [] : (() => {
 						try {
@@ -138,24 +139,27 @@ function runCommand(cmd) {
 						} catch { return []; }
 					})();
 					
-					// Determina se serve 'start' (per protocolli) o esecuzione diretta
-					const needsStart = cmd.command.includes('://') || cmd.command.startsWith('shell:');
-					const cmdCommand = needsStart 
-						? `cmd.exe /c start "" "${cmd.command}"`
-						: `cmd.exe /c "${cmd.command}"`;
+					// Avvia il comando tramite cmd.exe con start
+					const cmdCommand = `cmd.exe /c start "" "${cmd.command}"`;
 					
-					// Avvia il comando
-					exec(cmdCommand, { cwd: __dirname }, (err, stdout, stderr) => {
-						if (err) {
-							logger.error(`Errore esecuzione comando ${cmd.name}:`, stderr || err.message);
-							return reject(err);
+					// Usa exec ma ignora output (più veloce di spawn detached)
+					exec(cmdCommand, { windowsHide: true }, (err, stdout, stderr) => {
+						// Logga solo errori veri (non output dell'app)
+						if (err && err.code !== 0) {
+							const errorMsg = err.message || stderr || 'Unknown error';
+							const truncated = errorMsg.length > 128 
+								? errorMsg.substring(0, 128) + '...' 
+								: errorMsg;
+							logger.error(`Errore avvio ${cmd.name}: ${truncated}`);
 						}
-						
-						// Aspetta che l'app si stabilizzi
-						setTimeout(() => {
-							// Trova NUOVE finestre
-							exec('powershell.exe -Command "Get-Process | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object Id, MainWindowTitle, ProcessName | ConvertTo-Json"',
-								(err, stdout) => {
+					});
+					
+					// Aspetta che l'app si stabilizzi
+					setTimeout(() => {
+						// Trova NUOVE finestre
+						exec('powershell.exe -Command "Get-Process | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object Id, MainWindowTitle, ProcessName | ConvertTo-Json"',
+							{ windowsHide: true },
+							(err, stdout) => {
 									if (err) {
 										// Fallback: usa PID fittizio
 										const fakePid = Date.now();
@@ -218,7 +222,6 @@ function runCommand(cmd) {
 								}
 							);
 						}, 1500); // Aspetta 1.5 secondi per stabilizzazione
-					});
 				}
 			);
 		} catch (error) {
