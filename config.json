@@ -52,30 +52,6 @@
       "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
       "requiresConfirmation": false,
       "description": "Apre Paint"
-    },
-    {
-      "id": 7,
-      "name": "Focus Chrome",
-      "command": "powershell.exe -ExecutionPolicy Bypass -File focus-window.ps1 -WindowTitle Chrome",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": false,
-      "description": "Porta Chrome in primo piano"
-    },
-    {
-      "id": 8,
-      "name": "Focus Notepad",
-      "command": "powershell.exe -ExecutionPolicy Bypass -File focus-window.ps1 -WindowTitle Notepad",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": false,
-      "description": "Porta Notepad in primo piano"
-    },
-    {
-      "id": 9,
-      "name": "Focus Calculator",
-      "command": "powershell.exe -ExecutionPolicy Bypass -File focus-window.ps1 -WindowTitle Calculator",
-      "icon": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-      "requiresConfirmation": false,
-      "description": "Porta Calculator in primo piano"
     }
   ]
 }

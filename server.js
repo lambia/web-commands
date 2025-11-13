@@ -15,8 +15,9 @@ const logger = winston.createLogger({
 		winston.format.json()
 	),
 	transports: [
-		new winston.transports.File({ filename: 'error.log', level: 'error' }),
-		new winston.transports.File({ filename: 'combined.log' }),
+		// File logging disabled to reduce disk I/O
+		// new winston.transports.File({ filename: 'error.log', level: 'error' }),
+		// new winston.transports.File({ filename: 'combined.log' }),
 		new winston.transports.Console({
 			format: winston.format.simple()
 		})
@@ -137,11 +138,9 @@ function runCommand(cmd) {
 				return;
 			}
 			
-			// Per comandi semplici, usa lo script PowerShell start-and-track-process.ps1
-			const scriptPath = path.join(__dirname, 'start-and-track-process.ps1');
-			const psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Command "${cmd.command}"`;
-			
-			exec(psCommand, { cwd: __dirname }, (err, stdout, stderr) => {
+		// Per comandi semplici, usa lo script PowerShell start-and-track-process.ps1
+		const scriptPath = path.join(__dirname, 'scripts', 'start-and-track-process.ps1');
+		const psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -Command "${cmd.command}"`;			exec(psCommand, { cwd: __dirname }, (err, stdout, stderr) => {
 				if (err) {
 					logger.error(`Errore esecuzione comando ${cmd.name}:`, stderr || err);
 					return reject(err);
@@ -299,7 +298,7 @@ app.get('/api/running', authenticate, (req, res) => {
 app.get('/api/windows', authenticate, (req, res) => {
 	try {
 		logger.info('Richiesta lista finestre aperte');
-		const scriptPath = path.join(__dirname, 'list-windows.ps1');
+		const scriptPath = path.join(__dirname, 'scripts', 'list-windows.ps1');
 		
 		exec(`powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}"`, (err, stdout, stderr) => {
 			if (err) {
@@ -342,7 +341,7 @@ app.post('/api/focus/:pid', authenticate, async (req, res) => {
 	}
 	
 	logger.info(`Tentativo focus finestra PID: ${pid}${processName ? `, Nome: ${processName}` : ''}${windowTitle ? `, Titolo: ${windowTitle}` : ''}`);
-	const scriptPath = path.join(__dirname, 'focus-window-by-pid.ps1');
+	const scriptPath = path.join(__dirname, 'scripts', 'focus-window-by-pid.ps1');
 	
 	// Passa window title se disponibile (per UWP apps), altrimenti nome processo
 	let psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -ProcessPid ${pid}`;
