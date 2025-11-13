@@ -18,18 +18,56 @@ try {
         $cmdId = $cmdObj.id
         $cmdFull = $cmdObj.command
         
-        # Estrai nome eseguibile (rimuove path, argomenti, .exe)
+        # Estrai comando (rimuove solo argomenti, mantieni path se presente)
         $cmdParts = $cmdFull -split '\s+' | Select-Object -First 1  # Rimuove argomenti
-        $executable = $cmdParts -replace '^.*[/\\]', ''  # Rimuove path
-        $executable = $executable -replace '\.exe$', '' -replace '\.cmd$', '' -replace '\.bat$', ''  # Rimuove estensioni
+        $commandClean = $cmdParts.Trim()
         
-        if (-not $executable) {
+        if (-not $commandClean) {
             continue
         }
         
-        # Cerca processi con nome simile
+        # Normalizza per confronto case-insensitive
+        $commandLower = $commandClean.ToLower()
+        
+        # Estrai anche varianti per matching flessibile
+        $commandFileName = Split-Path -Leaf $commandClean  # Es: "notepad.exe" o "notepad"
+        $commandFileNameLower = $commandFileName.ToLower()
+        
+        $commandNoExt = [System.IO.Path]::GetFileNameWithoutExtension($commandFileName)  # Es: "notepad"
+        $commandNoExtLower = $commandNoExt.ToLower()
+        
+        # Cerca processi che matchano
         $matchingProcesses = Get-Process | Where-Object { 
-            $_.ProcessName -like "*$executable*" 
+            try {
+                if ($_.Path) {
+                    $procPathLower = $_.Path.ToLower()
+                    
+                    # 1. Match esatto path completo: "c:\percorso\notepad.exe" == "c:\percorso\notepad.exe"
+                    if ($procPathLower -eq $commandLower) {
+                        return $true
+                    }
+                    
+                    # 2. Match nome file con estensione: "notepad.exe" == basename del path processo
+                    $procFileName = [System.IO.Path]::GetFileName($procPathLower)
+                    if ($procFileName -eq $commandFileNameLower) {
+                        return $true
+                    }
+                    
+                    # 3. Match nome senza estensione: "notepad" == basename senza .exe
+                    $procFileNoExt = [System.IO.Path]::GetFileNameWithoutExtension($procPathLower)
+                    if ($procFileNoExt -eq $commandNoExtLower) {
+                        return $true
+                    }
+                    
+                    # 4. Match parziale per UWP (CalculatorApp contiene "calc")
+                    if ($procFileNoExt -like "*$commandNoExtLower*") {
+                        return $true
+                    }
+                }
+            } catch {
+                # Ignora errori (processi di sistema senza accesso)
+            }
+            return $false
         }
         
         if (-not $matchingProcesses) {
