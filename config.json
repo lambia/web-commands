@@ -1,8 +1,6 @@
 {
   "port": 3000,
   "corsOrigins": ["http://localhost:3000"],
-  "rateLimitWindowMs": 60000,
-  "rateLimitMaxRequests": 30,
   "commands": [
     { 
       "id": 1, 
