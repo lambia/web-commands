@@ -104,7 +104,7 @@ function runCommand(cmd) {
 		try {
 			logger.info(`Esecuzione comando: ${cmd.name} (${cmd.command})`);
 			
-			// Se è un comando PowerShell script, usa exec per ottenere output
+			// Se è un comando PowerShell script, eseguilo ma non tracciarlo
 			if (cmd.command.includes('powershell.exe') && cmd.command.includes('.ps1')) {
 				exec(cmd.command, { cwd: __dirname }, (err, stdout, stderr) => {
 					if (err) {
@@ -112,18 +112,8 @@ function runCommand(cmd) {
 						return reject(err);
 					}
 					
-					// Per script PowerShell, non possiamo tracciare PID facilmente
-					// Usiamo un PID fittizio
-					const fakePid = Date.now();
-					runningApps[cmd.id] = {
-						pid: fakePid,
-						name: cmd.name,
-						startTime: new Date(),
-						isScript: true
-					};
-					
-					logger.info(`Script ${cmd.name} eseguito`);
-					resolve(fakePid);
+					logger.info(`Script ${cmd.name} eseguito (non tracciato)`);
+					resolve(null); // null = eseguito ma non tracciato
 				});
 				return;
 			}
@@ -161,16 +151,9 @@ function runCommand(cmd) {
 							{ windowsHide: true },
 							(err, stdout) => {
 									if (err) {
-										// Fallback: usa PID fittizio
-										const fakePid = Date.now();
-										runningApps[cmd.id] = {
-											pid: fakePid,
-											name: cmd.name,
-											startTime: new Date(),
-											isScript: true
-										};
-										logger.warn(`Impossibile tracciare finestra per ${cmd.name}, uso PID fittizio`);
-										return resolve(fakePid);
+										// Non tracciamo se non possiamo trovare finestre
+										logger.warn(`Impossibile tracciare finestra per ${cmd.name}, comando avviato ma non tracciato`);
+										return resolve(null); // null = avviato ma non tracciato
 									}
 									
 									try {
@@ -196,28 +179,14 @@ function runCommand(cmd) {
 											logger.info(`Comando ${cmd.name} avviato con PID ${newWindow.Id} (${newWindow.ProcessName}, finestra: ${newWindow.MainWindowTitle})`);
 											resolve(newWindow.Id);
 										} else {
-											// Nessuna nuova finestra, usa PID fittizio
-											const fakePid = Date.now();
-											runningApps[cmd.id] = {
-												pid: fakePid,
-												name: cmd.name,
-												startTime: new Date(),
-												isScript: true
-											};
-											logger.warn(`Nessuna nuova finestra per ${cmd.name}, uso PID fittizio`);
-											resolve(fakePid);
+											// Nessuna finestra nuova = comando avviato ma non tracciabile
+											logger.warn(`Nessuna nuova finestra per ${cmd.name}, comando avviato ma non tracciato`);
+											resolve(null); // null = avviato ma non tracciato
 										}
 									} catch (parseError) {
-										// Fallback in caso di errore parsing
-										const fakePid = Date.now();
-										runningApps[cmd.id] = {
-											pid: fakePid,
-											name: cmd.name,
-											startTime: new Date(),
-											isScript: true
-										};
-										logger.warn(`Errore parsing finestre per ${cmd.name}, uso PID fittizio`);
-										resolve(fakePid);
+										// Errore parsing = comando avviato ma non tracciabile
+										logger.warn(`Errore parsing finestre per ${cmd.name}, comando avviato ma non tracciato`);
+										resolve(null); // null = avviato ma non tracciato
 									}
 								}
 							);
@@ -552,9 +521,22 @@ app.post('/api/commands/:id', async (req, res) => {
 		}
 		
 		const pid = await runCommand(cmd);
+		
+		// Se pid è null, il comando è stato avviato ma non è tracciabile
+		if (pid === null) {
+			return res.json({ 
+				success: true, 
+				pid: null,
+				tracked: false,
+				command: cmd.name,
+				message: `${cmd.name} avviato con successo (non tracciato)`
+			});
+		}
+		
 		res.json({ 
 			success: true, 
 			pid,
+			tracked: true,
 			command: cmd.name,
 			message: `${cmd.name} avviato con successo`
 		});
