@@ -307,10 +307,21 @@ app.get('/api/windows', authenticate, (req, res) => {
 			}
 			
 			try {
-				const windows = JSON.parse(stdout);
+				// Some PowerShell outputs may include stray control characters or extra text.
+				// Try to extract the JSON array from stdout safely.
+				const raw = stdout || '';
+				const start = raw.indexOf('[');
+				const end = raw.lastIndexOf(']');
+				let payload = raw;
+				if (start !== -1 && end !== -1 && end > start) {
+					payload = raw.slice(start, end + 1);
+				}
+
+				const windows = JSON.parse(payload.trim());
 				res.json({ success: true, windows: Array.isArray(windows) ? windows : [windows] });
 			} catch (parseError) {
 				logger.error('Errore parsing JSON finestre:', parseError);
+				logger.debug('Raw stdout from list-windows:', stdout);
 				res.json({ success: true, windows: [] });
 			}
 		});

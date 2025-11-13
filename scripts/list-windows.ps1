@@ -27,47 +27,49 @@ try {
             $exePath = ""
         }
         
-        # Rimuovi caratteri di controllo e problematici dal titolo
         $current = $_
-        $cleanTitle = $current.MainWindowTitle
-        # Rimuove caratteri ASCII di controllo (0x00-0x1F) e DEL (0x7F)
-        $cleanTitle = $cleanTitle -replace '[\x00-\x1F\x7F]+', ''
-        # Rimuove anche altri caratteri problematici per JSON
-        $cleanTitle = $cleanTitle -replace '[\r\n\t]', ' '
-        $cleanTitle = $cleanTitle.Trim()
 
-        # Raccogli processi figli (se presenti) con pid, nome e path
-        $childProcesses = @()
-        try {
-            $children = Get-CimInstance Win32_Process | Where-Object { $_.ParentProcessId -eq $current.Id }
-            foreach ($ch in $children) {
-                $chPath = ''
-                try { $chPath = $ch.ExecutablePath } catch { $chPath = '' }
-                $childProcesses += [PSCustomObject]@{
-                    pid = $ch.ProcessId
-                    name = ($ch.Name -replace '\.exe$', '')
-                    path = $chPath
+        # Raccogli processi correlati (per UWP apps come Calculator)
+        $relatedProcesses = @()
+        if ($current.ProcessName -eq "ApplicationFrameHost") {
+            try {
+                # Cerca processi il cui nome contiene parte del window title
+                # Es: "Calculator" -> cerca "*Calc*"
+                $titleWords = $current.MainWindowTitle -split '\s+' | Where-Object { $_.Length -gt 3 }
+                
+                foreach ($word in $titleWords) {
+                    $matchingProcs = Get-Process | Where-Object { 
+                        $_.ProcessName -like "*$word*" -and 
+                        $_.Id -ne $current.Id
+                    } | Select-Object -First 5  # Limita per performance
+                    
+                    foreach ($proc in $matchingProcs) {
+                        $procPath = ""
+                        try { $procPath = $proc.Path } catch { }
+                        
+                        $relatedProcesses += [PSCustomObject]@{
+                            pid = $proc.Id
+                            name = $proc.ProcessName
+                            path = $procPath
+                        }
+                    }
                 }
+            } catch {
+                # ignore
             }
-        } catch {
-            # ignore
         }
 
         [PSCustomObject]@{
             process = $current.ProcessName
-            title = $cleanTitle
             pid = $current.Id
             path = $exePath
-            children = $childProcesses
+            children = $relatedProcesses
         }
     }
     
     # Output come JSON
     if ($windows) {
-        $json = $windows | ConvertTo-Json -Compress -Depth 3
-        # Ulteriore pulizia del JSON per sicurezza
-        $json = $json -replace '[\x00-\x1F\x7F]', ''
-        Write-Output $json
+        $windows | ConvertTo-Json -Compress -Depth 3
     } else {
         Write-Output "[]"
     }
