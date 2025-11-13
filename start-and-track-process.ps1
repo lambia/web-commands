@@ -18,14 +18,6 @@ try {
     # Ottieni il nome del processo (senza .exe)
     $processName = [System.IO.Path]::GetFileNameWithoutExtension($executable)
     
-    # Mapping per app UWP che usano ApplicationFrameHost
-    $uwpApps = @{
-        'calc' = 'Calculator'
-        'calculator' = 'Calculator'
-        'mspaint' = 'Paint'
-        'paint' = 'Paint'
-    }
-    
     # Salva finestre esistenti PRIMA del lancio
     $existingWindows = Get-Process | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object Id, MainWindowTitle
     
@@ -48,27 +40,17 @@ try {
         -not ($existingWindows | Where-Object { $_.Id -eq $currentPid })
     }
     
-    # Per app UWP, cerca il titolo specifico
-    $expectedTitle = $uwpApps[$processName.ToLower()]
-    if ($expectedTitle) {
-        # Prima cerca tra le NUOVE finestre
-        $uwpWindow = $newWindows | Where-Object { $_.MainWindowTitle -like "*$expectedTitle*" }
-        
-        # Se non trovato tra le nuove, cerca tra TUTTE le finestre (app già aperta)
-        if (-not $uwpWindow) {
-            $uwpWindow = $allWindows | Where-Object { $_.MainWindowTitle -like "*$expectedTitle*" } | Select-Object -First 1
-        }
-        
-        if ($uwpWindow) {
-            $finalProcessPid = $uwpWindow.Id
-            $finalProcessName = $uwpWindow.ProcessName
-            Write-Output "{`"success`":true,`"pid`":$finalProcessPid,`"initialPid`":$initialProcessPid,`"processName`":`"$finalProcessName`",`"windowTitle`":`"$($uwpWindow.MainWindowTitle)`"}"
-            exit 0
-        }
+    # Se c'è una nuova finestra, usala (qualsiasi essa sia)
+    if ($newWindows) {
+        $newWindow = $newWindows | Select-Object -First 1
+        $finalProcessPid = $newWindow.Id
+        $finalProcessName = $newWindow.ProcessName
+        Write-Output "{`"success`":true,`"pid`":$finalProcessPid,`"initialPid`":$initialProcessPid,`"processName`":`"$finalProcessName`",`"windowTitle`":`"$($newWindow.MainWindowTitle)`"}"
+        exit 0
     }
     
-    # Fallback: cerca per nome processo
-    $sameNameProcess = $newWindows | Where-Object { $_.ProcessName -eq $processName }
+    # Se non ci sono nuove finestre, cerca per nome processo tra le finestre esistenti
+    $sameNameProcess = $allWindows | Where-Object { $_.ProcessName -eq $processName } | Select-Object -First 1
     if ($sameNameProcess) {
         $finalProcessPid = $sameNameProcess.Id
         Write-Output "{`"success`":true,`"pid`":$finalProcessPid,`"initialPid`":$initialProcessPid,`"processName`":`"$($sameNameProcess.ProcessName)`",`"windowTitle`":`"$($sameNameProcess.MainWindowTitle)`"}"
