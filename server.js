@@ -1,5 +1,5 @@
 const express = require('express');
-const { spawn, exec } = require('child_process');
+const { spawn, exec, execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
@@ -9,7 +9,7 @@ const winston = require('winston');
 
 // Setup logger
 const logger = winston.createLogger({
-	level: 'info',
+	level: 'info',  // Tornato a info
 	format: winston.format.combine(
 		winston.format.timestamp(),
 		winston.format.json()
@@ -50,13 +50,13 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static('public'));
 
-// Rate limiting
-const limiter = rateLimit({
-	windowMs: config.rateLimitWindowMs || 60000,
-	max: config.rateLimitMaxRequests || 30,
-	message: { success: false, error: 'Troppi tentativi, riprova più tardi' }
-});
-app.use('/api/', limiter);
+// Rate limiting - DISABILITATO per sviluppo
+// const limiter = rateLimit({
+// 	windowMs: config.rateLimitWindowMs || 60000,
+// 	max: config.rateLimitMaxRequests || 30,
+// 	message: { success: false, error: 'Troppi tentativi, riprova più tardi' }
+// });
+// app.use('/api/', limiter);
 
 // Middleware autenticazione
 function authenticate(req, res, next) {
@@ -327,6 +327,56 @@ app.get('/api/windows', authenticate, (req, res) => {
 		});
 	} catch (error) {
 		logger.error('Errore recupero finestre:', error);
+		res.status(500).json({ success: false, error: 'Errore interno del server' });
+	}
+});
+
+// Endpoint: controlla quali comandi sono già in esecuzione
+app.post('/api/check-commands', authenticate, (req, res) => {
+	try {
+		const commandsToCheck = req.body.commands || [];
+		
+		if (!Array.isArray(commandsToCheck) || commandsToCheck.length === 0) {
+			return res.json({ success: true, results: [] });
+		}
+		
+		logger.info(`Controllo ${commandsToCheck.length} comandi in esecuzione`);
+		const scriptPath = path.join(__dirname, 'scripts', 'check-commands.ps1');
+		const commandsJson = JSON.stringify(commandsToCheck);
+		
+		execFile('powershell.exe', [
+			'-ExecutionPolicy', 'Bypass',
+			'-File', scriptPath,
+			'-CommandsJson', commandsJson
+		], (err, stdout, stderr) => {
+				if (err) {
+					logger.error('Errore check-commands:', err);
+					return res.status(500).json({ success: false, error: 'Errore controllo comandi' });
+				}
+				
+				try {
+					const raw = stdout || '';
+					const start = raw.indexOf('[');
+					const end = raw.lastIndexOf(']');
+					let payload = raw;
+					if (start !== -1 && end !== -1 && end > start) {
+						payload = raw.slice(start, end + 1);
+					} else if (raw.startsWith('{')) {
+						// Single object, wrap in array
+						payload = `[${raw.trim()}]`;
+					}
+
+					const results = JSON.parse(payload.trim());
+					logger.info(`check-commands trovati ${results.length} match`);
+					res.json({ success: true, results: Array.isArray(results) ? results : [results] });
+				} catch (parseError) {
+					logger.error('Errore parsing JSON check-commands:', parseError);
+					res.json({ success: true, results: [] });
+				}
+			}
+		);
+	} catch (error) {
+		logger.error('Errore controllo comandi:', error);
 		res.status(500).json({ success: false, error: 'Errore interno del server' });
 	}
 });

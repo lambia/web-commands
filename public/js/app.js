@@ -80,113 +80,49 @@ const app = createApp({
 
         async checkRunningApps() {
             try {
-                const response = await fetch(`${this.apiBase}/windows`, {
-                    headers: { 'X-API-Key': this.apiKey }
+                // Prepara lista comandi da controllare (solo quelli non già running)
+                const commandsToCheck = this.commands
+                    .filter(cmd => !cmd.isRunning)
+                    .map(cmd => ({ id: cmd.id, command: cmd.command }));
+                
+                if (commandsToCheck.length === 0) return;
+                
+                const response = await fetch(`${this.apiBase}/check-commands`, {
+                    method: 'POST',
+                    headers: { 
+                        'X-API-Key': this.apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ commands: commandsToCheck })
                 });
 
                 if (!response.ok) return;
 
                 const data = await response.json();
                 
-                if (data.success && Array.isArray(data.windows)) {
-                    // Per ogni comando, verifica se è già running
-                    for (const cmd of this.commands) {
-                        // Salta se già tracciato dal server
-                        if (cmd.isRunning) continue;
-                        
-                        // Estrae il nome eseguibile dal comando (rimuove path e argomenti)
-                        const cmdParts = cmd.command.split(/\s+/)[0]; // Rimuove argomenti
-                        const cmdExecutable = cmdParts.split(/[/\\]/).pop(); // Prende solo il nome file (rimuove path)
-                        const cmdExecutableNoExt = cmdExecutable.toLowerCase().replace(/\.exe$/, ''); // Rimuove .exe
-                        
-                        // Cerca tra le finestre aperte
-                        const runningWindow = data.windows.find(win => {
-                            const processName = win.process.toLowerCase();
-                            const processPath = (win.path || '').toLowerCase();
-                            
-                            // Estrae nome eseguibile dal path della finestra
-                            let windowExecutable = '';
-                            if (processPath) {
-                                windowExecutable = processPath.split(/[/\\]/).pop().replace(/\.exe$/, '').toLowerCase();
-                            }
-                            
-                            // 1. Match esatto per nome eseguibile dal path
-                            if (cmdExecutableNoExt && windowExecutable && cmdExecutableNoExt === windowExecutable) {
-                                console.log(`✅ Match esatto path: ${cmdExecutable} = ${windowExecutable}`);
-                                return true;
-                            }
-                            
-                            // 2. Match process name esatto
-                            if (cmdExecutableNoExt === processName) {
-                                console.log(`✅ Match esatto process: ${cmdExecutable} = ${processName}`);
-                                return true;
-                            }
-                            
-                            // 3. Match parziale: cerca se command è incluso nel process name
-                            if (cmdExecutableNoExt && processName.includes(cmdExecutableNoExt)) {
-                                console.log(`✅ Match command in process: "${cmdExecutableNoExt}" found in "${processName}"`);
-                                return true;
-                            }
-                            
-                            // 4. Match parziale inverso: cerca se process name è incluso nel command
-                            if (processName && cmdParts.toLowerCase().includes(processName)) {
-                                console.log(`✅ Match process in command: "${processName}" found in "${cmdParts}"`);
-                                return true;
-                            }
-                            
-                            // 5. Match per UWP apps: verifica se children contiene process corrispondente
-                            // Es: command "calc" -> children ha "CalculatorApp"
-                            if (processName === 'applicationframehost' && Array.isArray(win.children)) {
-                                const childMatch = win.children.find(c => {
-                                    const childName = (c.name || '').toLowerCase();
-                                    const childPath = (c.path || '').toLowerCase();
-                                    return childName.includes(cmdExecutableNoExt) || childPath.includes(cmdExecutableNoExt);
-                                });
-                                if (childMatch) {
-                                    console.log(`✅ Match UWP child: "${cmdExecutableNoExt}" found in child "${childMatch.name}"`);
-                                    return true;
-                                }
-                            }
-                            
-                            return false;
-                        });
-                        
-                        // Se trovato, adotta il processo (preferisci pid del child se disponibile)
-                        if (runningWindow) {
-                            let adoptPid = runningWindow.pid;
-                            let adoptProcessName = runningWindow.process;
-
-                            if (Array.isArray(runningWindow.children) && runningWindow.children.length > 0) {
-                                const childMatch = runningWindow.children.find(c => {
-                                    const childName = (c.name || '').toLowerCase();
-                                    const childPath = (c.path || '').toLowerCase();
-                                    return childName.includes(cmdExecutableNoExt) || childPath.includes(cmdExecutableNoExt);
-                                });
-
-                                if (childMatch) {
-                                    adoptPid = childMatch.pid;
-                                    adoptProcessName = childMatch.name || adoptProcessName;
-                                    console.log(`🔎 Using child PID ${adoptPid} (${adoptProcessName}) for command ${cmd.name}`);
-                                    await this.adoptProcess(cmd.id, { pid: adoptPid, process: adoptProcessName });
-                                } else {
-                                    // If this is ApplicationFrameHost and no matching child yet, skip adoption (child may appear shortly)
-                                    if (runningWindow.process && runningWindow.process.toLowerCase() === 'applicationframehost') {
-                                        console.log(`⏭ Skipping adoption for ApplicationFrameHost PID ${runningWindow.pid} (no matching child yet)`);
-                                        continue;
-                                    } else {
-                                        // Non-UWP host without child match: adopt the host PID
-                                        await this.adoptProcess(cmd.id, { pid: adoptPid, process: adoptProcessName });
-                                    }
-                                }
-                            } else {
-                                // No children array: only adopt if not an ApplicationFrameHost
-                                if (runningWindow.process && runningWindow.process.toLowerCase() === 'applicationframehost') {
-                                    console.log(`⏭ Skipping adoption for ApplicationFrameHost PID ${runningWindow.pid} (no children information)`);
-                                    continue;
-                                }
-                                await this.adoptProcess(cmd.id, { pid: adoptPid, process: adoptProcessName });
-                            }
+                if (data.success && Array.isArray(data.results)) {
+                    // Raggruppa risultati per commandId
+                    const resultsByCommand = {};
+                    data.results.forEach(result => {
+                        if (!resultsByCommand[result.commandId]) {
+                            resultsByCommand[result.commandId] = [];
                         }
+                        resultsByCommand[result.commandId].push(result);
+                    });
+                    
+                    // Adotta processi trovati
+                    for (const [cmdId, matches] of Object.entries(resultsByCommand)) {
+                        // Prendi il primo match (o gestisci multi-istanza in futuro)
+                        const match = matches[0];
+                        
+                        console.log(`✅ Found running: command ${cmdId}, processPid=${match.processPid}, windowPid=${match.windowPid}, isUWP=${match.isUWP}`);
+                        
+                        await this.adoptProcess(parseInt(cmdId), {
+                            pid: match.processPid,
+                            windowPid: match.windowPid,
+                            process: match.processName,
+                            isUWP: match.isUWP
+                        });
                     }
                     
                     // Ricarica comandi dopo adozione
