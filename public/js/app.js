@@ -79,9 +79,10 @@ const app = createApp({
                         const match = matches[0];
                         
                         await this.adoptProcess(parseInt(cmdId), {
-                            pid: match.processPid,
+                            pid: match.isUWP ? match.windowPid : match.processPid,
                             windowPid: match.windowPid,
-                            process: match.processName,
+                            process: match.isUWP ? match.windowProcess : match.processName,
+                            title: match.windowTitle,
                             isUWP: match.isUWP
                         });
                     }

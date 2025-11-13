@@ -15,6 +15,7 @@ param(
 Add-Type @"
   using System;
   using System.Runtime.InteropServices;
+  using System.Text;
   public class Win32 {
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -24,10 +25,53 @@ Add-Type @"
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     
+    [DllImport("user32.dll")]
+    public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+    
+    [DllImport("user32.dll")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+    
+    [DllImport("user32.dll")]
+    public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+    
+    [DllImport("user32.dll")]
+    public static extern bool IsWindowVisible(IntPtr hWnd);
+    
+    public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+    
     public const int SW_RESTORE = 9;
     public const int SW_SHOW = 5;
   }
 "@
+
+function Get-WindowHandleByPid($targetPid) {
+    $script:foundWindows = @()
+    $callback = {
+        param($hWnd, $lParam)
+        
+        if ([Win32]::IsWindowVisible($hWnd)) {
+            $processId = 0
+            [Win32]::GetWindowThreadProcessId($hWnd, [ref]$processId) | Out-Null
+            
+            if ($processId -eq $targetPid) {
+                $title = New-Object System.Text.StringBuilder 256
+                [Win32]::GetWindowText($hWnd, $title, $title.Capacity) | Out-Null
+                
+                if ($title.Length -gt 0) {
+                    $script:foundWindows += [PSCustomObject]@{
+                        Handle = $hWnd
+                        Title = $title.ToString()
+                    }
+                }
+            }
+        }
+        return $true
+    }
+    
+    [Win32]::EnumWindows($callback, [IntPtr]::Zero) | Out-Null
+    
+    return $script:foundWindows
+}
 
 function Try-FocusProcess($proc) {
     if ($proc -and $proc.MainWindowHandle -ne [IntPtr]::Zero) {
@@ -47,7 +91,25 @@ function Try-FocusProcess($proc) {
 }
 
 try {
-    # Prova prima con il PID esatto
+    # Prova prima con Win32 API per trovare finestre del PID
+    $windows = Get-WindowHandleByPid $ProcessPid
+    
+    if ($windows -and $windows.Count -gt 0) {
+        $window = $windows[0]
+        Write-Host "Trovata finestra '$($window.Title)' per PID $ProcessPid" -ForegroundColor Green
+        
+        # Ripristina e porta in primo piano
+        [Win32]::ShowWindow($window.Handle, [Win32]::SW_RESTORE) | Out-Null
+        Start-Sleep -Milliseconds 100
+        $result = [Win32]::SetForegroundWindow($window.Handle)
+        
+        if ($result) {
+            Write-Host "Finestra portata in primo piano con successo" -ForegroundColor Green
+            exit 0
+        }
+    }
+    
+    # Fallback: prova con Get-Process
     $process = Get-Process -Id $ProcessPid -ErrorAction SilentlyContinue
     
     if (Try-FocusProcess $process) {

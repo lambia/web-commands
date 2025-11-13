@@ -101,7 +101,7 @@ try {
             # Cerca finestra ApplicationFrameHost con titolo matching
             $uwpWindow = Get-Process | Where-Object { 
                 $_.ProcessName -eq "ApplicationFrameHost" -and
-                $_.MainWindowTitle -like "*$executable*"
+                $_.MainWindowTitle -like "*$commandNoExt*"
             } | Select-Object -First 1
             
             if ($uwpWindow) {
