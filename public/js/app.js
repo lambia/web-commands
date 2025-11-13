@@ -94,18 +94,67 @@ const app = createApp({
                         // Salta se già tracciato dal server
                         if (cmd.isRunning) continue;
                         
-                        // Estrae il nome eseguibile dal comando (es. "notepad" da "notepad" o "calc" da "calc")
-                        const cmdExecutable = cmd.command.split(/\s+/)[0].toLowerCase().replace(/\.exe$/, '');
+                        // Estrae il nome eseguibile dal comando (rimuove path e argomenti)
+                        const cmdParts = cmd.command.split(/\s+/)[0]; // Rimuove argomenti
+                        const cmdExecutable = cmdParts.split(/[/\\]/).pop(); // Prende solo il nome file (rimuove path)
+                        const cmdExecutableNoExt = cmdExecutable.toLowerCase().replace(/\.exe$/, ''); // Rimuove .exe
                         
                         // Cerca tra le finestre aperte
                         const runningWindow = data.windows.find(win => {
                             const processName = win.process.toLowerCase();
                             const processPath = (win.path || '').toLowerCase();
                             
-                            // Match per nome processo o path che contiene l'eseguibile
-                            return processName === cmdExecutable || 
-                                   processName.includes(cmdExecutable) ||
-                                   processPath.includes(cmdExecutable);
+                            // Estrae nome eseguibile dal path della finestra
+                            let windowExecutable = '';
+                            if (processPath) {
+                                windowExecutable = processPath.split(/[/\\]/).pop().replace(/\.exe$/, '');
+                            }
+                            
+                            // 1. Match esatto per nome eseguibile dal path
+                            if (cmdExecutableNoExt && windowExecutable && cmdExecutableNoExt === windowExecutable) {
+                                console.log(`✅ Match esatto path: ${cmdExecutable} = ${windowExecutable}`);
+                                return true;
+                            }
+                            
+                            // 2. Match process name esatto
+                            if (cmdExecutableNoExt === processName) {
+                                console.log(`✅ Match esatto process: ${cmdExecutable} = ${processName}`);
+                                return true;
+                            }
+                            
+                            // 3. Match parziale: cerca se command è incluso nel process name
+                            if (processName.includes(cmdExecutableNoExt)) {
+                                console.log(`✅ Match command in process: "${cmdExecutableNoExt}" found in "${processName}"`);
+                                return true;
+                            }
+                            
+                            // 4. Match parziale inverso: cerca se process name è incluso nel command
+                            if (cmdParts.toLowerCase().includes(processName)) {
+                                console.log(`✅ Match process in command: "${processName}" found in "${cmdParts}"`);
+                                return true;
+                            }
+                            
+                            // 5. Match per UWP apps: verifica processi correlati (es: ApplicationFrameHost -> CalculatorApp)
+                            if (processName === 'applicationframehost' && Array.isArray(win.relatedProcesses)) {
+                                for (const relatedProc of win.relatedProcesses) {
+                                    const relatedName = relatedProc.name.toLowerCase();
+                                    const relatedPath = (relatedProc.path || '').toLowerCase();
+                                    
+                                    // Estrae eseguibile dal path del processo correlato
+                                    let relatedExecutable = relatedName.replace(/\.exe$/, '');
+                                    if (relatedPath) {
+                                        relatedExecutable = relatedPath.split(/[/\\]/).pop().replace(/\.exe$/, '');
+                                    }
+                                    
+                                    // Match esatto o parziale con processo correlato
+                                    if (relatedName.includes(cmdExecutableNoExt) || relatedExecutable.includes(cmdExecutableNoExt)) {
+                                        console.log(`✅ Match UWP related process: "${cmdExecutableNoExt}" found in "${relatedName}"`);
+                                        return true;
+                                    }
+                                }
+                            }
+                            
+                            return false;
                         });
                         
                         // Se trovato, adotta il processo
