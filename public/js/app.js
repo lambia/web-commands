@@ -70,6 +70,98 @@ const app = createApp({
                 
                 if (data.success) {
                     this.commands = data.commands;
+                    // Dopo aver caricato i comandi, verifica quali sono già running
+                    await this.checkRunningApps();
+                }
+            } catch (error) {
+                console.error('Errore caricamento comandi:', error);
+            }
+        },
+
+        async checkRunningApps() {
+            try {
+                const response = await fetch(`${this.apiBase}/windows`, {
+                    headers: { 'X-API-Key': this.apiKey }
+                });
+
+                if (!response.ok) return;
+
+                const data = await response.json();
+                
+                if (data.success && Array.isArray(data.windows)) {
+                    // Per ogni comando, verifica se è già running
+                    for (const cmd of this.commands) {
+                        // Salta se già tracciato dal server
+                        if (cmd.isRunning) continue;
+                        
+                        // Estrae il nome eseguibile dal comando (es. "notepad" da "notepad" o "calc" da "calc")
+                        const cmdExecutable = cmd.command.split(/\s+/)[0].toLowerCase().replace(/\.exe$/, '');
+                        
+                        // Cerca tra le finestre aperte
+                        const runningWindow = data.windows.find(win => {
+                            const processName = win.process.toLowerCase();
+                            const processPath = (win.path || '').toLowerCase();
+                            
+                            // Match per nome processo o path che contiene l'eseguibile
+                            return processName === cmdExecutable || 
+                                   processName.includes(cmdExecutable) ||
+                                   processPath.includes(cmdExecutable);
+                        });
+                        
+                        // Se trovato, adotta il processo
+                        if (runningWindow) {
+                            await this.adoptProcess(cmd.id, runningWindow);
+                        }
+                    }
+                    
+                    // Ricarica comandi dopo adozione
+                    await this.loadCommandsOnly();
+                }
+            } catch (error) {
+                console.error('Errore check running apps:', error);
+            }
+        },
+
+        async adoptProcess(cmdId, window) {
+            try {
+                const response = await fetch(`${this.apiBase}/commands/${cmdId}/adopt`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': this.apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pid: window.pid,
+                        processName: window.process,
+                        windowTitle: window.title
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log(`✅ Processo adottato: ${window.process} (PID: ${window.pid})`);
+                } else {
+                    console.warn(`⚠️ Impossibile adottare processo ${window.process}: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Errore adozione processo:', error);
+            }
+        },
+
+        async loadCommandsOnly() {
+            // Carica comandi senza ri-chiamare checkRunningApps (per evitare loop)
+            try {
+                const response = await fetch(`${this.apiBase}/commands`, {
+                    headers: { 'X-API-Key': this.apiKey }
+                });
+
+                if (!response.ok) return;
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.commands = data.commands;
                 }
             } catch (error) {
                 console.error('Errore caricamento comandi:', error);

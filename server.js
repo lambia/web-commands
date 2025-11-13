@@ -372,6 +372,50 @@ app.post('/api/focus/:pid', authenticate, async (req, res) => {
 	}
 });
 
+// Endpoint: adotta processo già avviato
+app.post('/api/commands/:id/adopt', authenticate, async (req, res) => {
+	try {
+		const cmdId = parseInt(req.params.id);
+		const { pid, processName, windowTitle } = req.body;
+		
+		if (isNaN(cmdId) || !pid) {
+			return res.status(400).json({ success: false, error: 'ID comando o PID invalido' });
+		}
+		
+		const cmd = config.commands.find(c => c.id === cmdId);
+		if (!cmd) {
+			return res.status(404).json({ success: false, error: 'Comando non trovato' });
+		}
+		
+		// Verifica che il processo esista
+		const exists = await processExists(pid, processName);
+		if (!exists) {
+			return res.status(404).json({ success: false, error: 'Processo non trovato' });
+		}
+		
+		// Adotta il processo
+		runningApps[cmdId] = {
+			pid: pid,
+			processName: processName || '',
+			windowTitle: windowTitle || '',
+			name: cmd.name,
+			startTime: new Date(),
+			isScript: false
+		};
+		
+		logger.info(`Processo adottato: ${cmd.name} (PID: ${pid}, Nome: ${processName})`);
+		
+		res.json({ 
+			success: true, 
+			message: `${cmd.name} adottato con successo`,
+			pid: pid
+		});
+	} catch (error) {
+		logger.error('Errore adozione processo:', error);
+		res.status(500).json({ success: false, error: 'Errore interno del server' });
+	}
+});
+
 // Endpoint: esegue comando
 app.post('/api/commands/:id', authenticate, async (req, res) => {
 	try {

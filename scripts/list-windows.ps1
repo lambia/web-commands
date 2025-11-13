@@ -18,11 +18,20 @@ try {
     $windows = Get-Process | Where-Object { 
         $_.MainWindowHandle -ne 0 -and 
         $_.MainWindowTitle -ne "" 
-    } | Select-Object -Property ProcessName, MainWindowTitle, Id | ForEach-Object {
+    } | ForEach-Object {
+        # Ottieni path eseguibile (può fallire per processi system)
+        $exePath = ""
+        try {
+            $exePath = $_.Path
+        } catch {
+            $exePath = ""
+        }
+        
         [PSCustomObject]@{
             process = $_.ProcessName
             title = $_.MainWindowTitle
             pid = $_.Id
+            path = $exePath
         }
     }
     
