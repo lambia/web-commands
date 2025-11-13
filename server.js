@@ -262,7 +262,10 @@ app.get('/api/health', (req, res) => {
 // Endpoint: lista comandi
 app.get('/api/commands', (req, res) => {
 	try {
-		const commandsWithStatus = config.commands.map(cmd => ({
+		// Filtra solo i comandi visibili
+		const visibleCommands = config.commands.filter(cmd => cmd.visible !== false);
+		
+		const commandsWithStatus = visibleCommands.map(cmd => ({
 			...cmd,
 			isRunning: runningApps[cmd.id] ? true : false,
 			pid: runningApps[cmd.id]?.pid

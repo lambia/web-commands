@@ -7,6 +7,7 @@
       "name": "Streaming Community",
       "command": "",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#000000",
@@ -28,6 +29,7 @@
       "name": "Stremio",
       "command": "%USERPROFILE%\\AppData\\Local\\Programs\\Stremio\\Stremio.exe",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#000000",
@@ -48,6 +50,7 @@
       "name": "Steam",
       "command": "\"C:\\Program Files (x86)\\Steam\\Steam.exe\" -bigpicture",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "background": "linear-gradient(0deg,rgba(3, 112, 164, 1) 0%, rgba(19, 52, 98, 1) 60%, rgba(20, 28, 52, 1) 95%)",
@@ -69,6 +72,7 @@
       "name": "Disney+",
       "command": "",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#020C6F",
@@ -90,6 +94,7 @@
       "name": "Netflix",
       "command": "",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#000000",
@@ -111,6 +116,7 @@
       "name": "Now TV",
       "command": "",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#00818A",
@@ -132,6 +138,7 @@
       "name": "Prime Video",
       "command": "",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#00A8E1",
@@ -153,6 +160,7 @@
       "name": "Spotify",
       "command": "C:\\Program Files\\WindowsApps\\SpotifyAB.SpotifyMusic_<versione>_x64__zpdnekdrzrea0\\Spotify.exe",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#1DB954",
@@ -173,6 +181,7 @@
       "name": "YouTube",
       "command": "",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#FF0000",
@@ -194,6 +203,7 @@
       "name": "Google",
       "command": "",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#FFFFFF",
@@ -215,6 +225,7 @@
       "name": "Settings",
       "command": "",
       "requiresConfirmation": false,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#6b7280",
@@ -235,6 +246,7 @@
       "name": "Sleep", 
       "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
       "requiresConfirmation": true,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#1e40af",
@@ -255,6 +267,7 @@
       "name": "Hibernate", 
       "command": "shutdown /h",
       "requiresConfirmation": true,
+      "visible": false,
       "tile": {
         "style": {
           "backgroundColor": "#7c3aed",
@@ -275,6 +288,7 @@
       "name": "Shutdown", 
       "command": "shutdown /s /t 0",
       "requiresConfirmation": true,
+      "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#dc2626",
