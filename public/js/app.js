@@ -66,21 +66,36 @@ const app = createApp({
     methods: {
         // ==================== SEARCH ====================
         search() {
-            this.results = [];
-
-            if (this.searchString.length >= 3) {
-                fetch(`${this.tmdbApiUrl}/search/multi?query=${encodeURIComponent(this.searchString)}&include_adult=true&language=it-IT&page=1&region=it-IT`, this.tmdbOptions)
-                    .then(r => r.json())
-                    .then(r => {
-                        this.results = r.results.filter(item => item.media_type !== "person");
-                    })
-                    .then(() => {
-                        this.getProviders();
-                    })
-                    .catch(err => {
-                        console.error('Search error:', err);
-                    });
+            if (!this.searchString || this.searchString.trim() === '') {
+                this.results = [];
+                return;
             }
+            
+            // Altrimenti aggiorna i risultati senza svuotare prima
+            fetch(`${this.tmdbApiUrl}/search/multi?query=${encodeURIComponent(this.searchString)}&include_adult=true&language=it-IT&page=1&region=it-IT`, this.tmdbOptions)
+                .then(r => r.json())
+                .then(r => {
+                    this.results = r.results.filter(item => {
+                        // Filtra le "person"
+                        if (item.media_type === "person") return false;
+                        
+                        // Filtra i risultati incompleti (no immagini, no voto, no data)
+                        // E' un bug dell'API di TMDB recente
+                        const isIncomplete = 
+                            !item.backdrop_path && 
+                            !item.poster_path && 
+                            item.vote_average === 0 && 
+                            (item.release_date === "" || item.first_air_date === "");
+                        
+                        return !isIncomplete;
+                    });
+                })
+                .then(() => {
+                    this.getProviders();
+                })
+                .catch(err => {
+                    console.error('Search error:', err);
+                });
         },
         
         clearSearch() {
