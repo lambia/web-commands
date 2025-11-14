@@ -15,8 +15,6 @@ const CommandCard = {
            @click="handleCardClick"
            tabindex="0"
            @keydown.enter="handleCardClick">
-           <div class="hover-wrapper">
-            
             <!-- Status Badge - solo se running -->
             <div v-if="command.isRunning" 
                  class="command-status" 
@@ -25,6 +23,8 @@ const CommandCard = {
                 RUNNING
                 <i class="fas fa-stop stop-icon"></i>
             </div>
+            <div class="hover-wrapper">
+            
 
             <!-- Card Content -->
             <component 
