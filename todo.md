@@ -1,8 +1,10 @@
 # ToDo
 
 # in corso
-- aggiungi un api che permetta di modificare la configurazione. si devono poter fare le CRUD dei comandi disponibili e l'upload dei file immagine
 - search funzionante con providers
+- titolo, icona
+- aggiungi un api che permetta di modificare la configurazione. si devono poter fare le CRUD dei comandi disponibili e l'upload dei file immagine
+- commands in basso a destra
 
 ## impostazioni (icona cog)
 deve portare una pagina dove si possono cambiare:
@@ -12,6 +14,7 @@ deve portare una pagina dove si possono cambiare:
 - se di default avere il tema "dark" che sostituisce il gradiente con un background nero
 - se attivare il "Randomize Tile Position" che nella descrizione spiega che serve a evitare OLED Burn-in
 - se avere il refresh automatico ogni 5s sarà sotto un booleano flaggato qui, di default false. inoltre bisogna poter scegliere il tempo, di default 5*60s
+- start /MAX globale e per app
 - dark mode (bg scuro, ui chiara)
 - bg con URL o gradienti
 
@@ -27,3 +30,4 @@ deve portare una pagina dove si possono cambiare:
 - test: app normale / UWP / bash / bash.pause / singleton / steam che spawna figli
 - dobbiamo dare la possibilità di gestire argomenti con il command, li salviamo in una proprietà separata così da comporre poi noi la stringa completa
 - verifichiamo path con spazi
+- trovare il modo di dare un F11 dopo spotify e VLC

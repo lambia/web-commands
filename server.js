@@ -130,7 +130,7 @@ function runCommand(cmd) {
 					})();
 					
 					// Avvia il comando tramite cmd.exe con start
-					const cmdCommand = `cmd.exe /c start "" "${cmd.action.value}"`;
+					const cmdCommand = `cmd.exe /c start "" "${cmd.action.value}" ${cmd.action.arguments || ''}`;
 					
 					// Usa exec ma ignora output (più veloce di spawn detached)
 					exec(cmdCommand, { windowsHide: true }, (err, stdout, stderr) => {
