@@ -1,7 +1,6 @@
 # ToDo
 
 # in corso
-- search funzionante con providers
 - titolo, icona
 - aggiungi un api che permetta di modificare la configurazione. si devono poter fare le CRUD dei comandi disponibili e l'upload dei file immagine
 - commands in basso a destra
