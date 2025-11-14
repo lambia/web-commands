@@ -14,20 +14,20 @@
       "visible": true,
       "tile": {
         "style": {
-          "backgroundColor": "#000000",
-          "color": "#FFFFFF"
+          "backgroundColor": "white",
+          "color": "#7512FC"
         },
         "class": "card-padding-thin"
       },
       "icon": {
         "type": "img",
-        "src": "./icons/jack-rackham.svg",
-        "class": "card-img-contain card-img-light"
+        "src": "./icons/stremio.png",
+        "class": "card-img-contain"
       },
       "text": {
-        "visible": false,
+        "visible": true,
         "name": "Stremio",
-        "class": "text-3"
+        "class": "text-4"
       }
     },
     {
@@ -121,17 +121,18 @@
       "visible": true,
       "tile": {
         "style": {
-          "backgroundColor": "#0055ff",
+          "backgroundColor": "black",
           "color": "white"
         },
         "class": "card-padding-thin"
       },
       "icon": {
-        "type": "i",
-        "class": "fa-solid fa-play-circle text-7"
+        "type": "img",
+        "src": "./icons/jack-rackham.svg",
+        "class": "card-img-contain"
       },
       "text": {
-        "visible": true,
+        "visible": false,
         "name": "Streaming Unity",
         "class": "text-1",
         "style": {
