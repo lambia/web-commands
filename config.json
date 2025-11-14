@@ -3,28 +3,6 @@
   "corsOrigins": ["http://localhost:3000"],
   "commands": [
     {
-      "id": 1,
-      "name": "Streaming Community",
-      "command": "",
-      "requiresConfirmation": false,
-      "visible": true,
-      "tile": {
-        "style": {
-          "backgroundColor": "#000000",
-          "color": "#FFFFFF"
-        },
-        "href": "https://streamingcommunity.support/",
-        "class": "card-padding-thin"
-      },
-      "text": {
-        "name": "Streaming Community",
-        "class": "text-3"
-      },
-      "icon": {
-        "class": "fa-solid fa-play-circle text-7"
-      }
-    },
-    {
       "id": 2,
       "name": "Stremio",
       "command": "%USERPROFILE%\\AppData\\Local\\Programs\\Stremio\\stremio-shell-ng.exe",
@@ -65,6 +43,74 @@
       "img": {
         "src": "./icons/steam.svg",
         "class": "card-img-contain card-img-light"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Spotify",
+      "command": "shell:AppsFolder\\SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify",
+      "requiresConfirmation": false,
+      "visible": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#1DB954",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/spotify.svg",
+        "class": "card-img-contain card-img-light"
+      },
+      "text": {
+        "name": "Spotify"
+      }
+    },
+    {
+      "id": 15,
+      "name": "VLC",
+      "command": "vlc",
+      "requiresConfirmation": false,
+      "visible": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#000000",
+          "color": "#FFFFFF"
+        },
+        "class": "card-padding-thin"
+      },
+      "img": {
+        "src": "./icons/vlc.svg",
+        "class": "card-img-contain"
+      },
+      "text": {
+        "name": "VLC",
+        "class": "text-7"
+      },
+      "icon": {
+        "class": "fa-solid fa-circle-play text-9"
+      }
+    },
+    {
+      "id": 1,
+      "name": "Streaming Community",
+      "command": "",
+      "requiresConfirmation": false,
+      "visible": true,
+      "tile": {
+        "style": {
+          "backgroundColor": "#000000",
+          "color": "#FFFFFF"
+        },
+        "href": "https://streamingcommunity.support/",
+        "class": "card-padding-thin"
+      },
+      "text": {
+        "name": "Streaming Community",
+        "class": "text-3"
+      },
+      "icon": {
+        "class": "fa-solid fa-play-circle text-7"
       }
     },
     {
@@ -153,27 +199,6 @@
       },
       "text": {
         "name": "Prime Video"
-      }
-    },
-    {
-      "id": 8,
-      "name": "Spotify",
-      "command": "shell:AppsFolder\\SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify",
-      "requiresConfirmation": false,
-      "visible": true,
-      "tile": {
-        "style": {
-          "backgroundColor": "#1DB954",
-          "color": "#FFFFFF"
-        },
-        "class": "card-padding-thin"
-      },
-      "img": {
-        "src": "./icons/spotify.svg",
-        "class": "card-img-contain card-img-light"
-      },
-      "text": {
-        "name": "Spotify"
       }
     },
     {

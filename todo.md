@@ -20,6 +20,7 @@ deve portare una pagina dove si possono cambiare:
 - fare il randomize 
 
 ## altre funzionalità:
+- wrapper electron
 - auto update (anche solo git trigger)
 - disattiva polling se la finestra non ha il focus e dopo 5 minuti che non vengono premuti tasti o mosso il mouse
 - gestione di un secret in qualche modo (general e/o per command) + rate limiting su login (non su comandi)
