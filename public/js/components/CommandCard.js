@@ -12,7 +12,6 @@ const CommandCard = {
            :style="cardStyle" 
            :class="cardClass"
            :href="cardHref"
-           :target="cardHref ? '_blank' : undefined"
            @click="handleCardClick"
            tabindex="0"
            @keydown.enter="handleCardClick">
