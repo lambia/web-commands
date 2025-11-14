@@ -26,23 +26,22 @@
         <div id="appContainer">
             <header class="app-header">
                 <h1><i class="fas fa-terminal"></i> Web Commands</h1>
-                <p class="subtitle">Control Panel</p>
             </header>
 
             <!-- Search Bar (temporaneamente disabilitata) -->
-            <!-- <header class="appSearchBar">
+            <header class="appSearchBar">
                 <input 
                     type="text" 
                     placeholder="Search commands..." 
                     v-model="searchString"
                     @input="filterCommands"
                 >
-            </header> -->
+            </header>
 
             <!-- Stats -->
-            <section class="stats-section" v-if="runningCount > 0">
-                <span class="stat-value">{{ runningCount }}</span> command{{ runningCount > 1 ? 's' : '' }} running
-            </section>
+            <!-- <section class="stats-section">
+                <span class="stat-value">{{ runningCount }}</span> command{{ runningCount !== 1 ? 's' : '' }} running
+            </section> -->
 
             <!-- Command Grid -->
             <main class="appCardGrid">
