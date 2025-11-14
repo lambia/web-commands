@@ -132,7 +132,7 @@
         "class": "card-img-contain"
       },
       "text": {
-        "visible": false,
+        "visible": true,
         "name": "Streaming Unity",
         "class": "text-1",
         "style": {

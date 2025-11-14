@@ -60,7 +60,7 @@ body {
 }
 
 .appSearchBar>input {
-    width: 100%;
+    width: calc(100% - 3rem);
     background: none;
     font-size: 2rem;
     color: white;
@@ -72,7 +72,20 @@ body {
     transition: all 0.3s;
 }
 
-.appSearchBar>input:focus {
+.appSearchBar>.clear {
+    width: 3rem;
+    background: none;
+    font-size: 2rem;
+    color: white;
+    padding: 0.4rem;
+    border: none;
+    border-bottom: solid 3px #666;
+    outline: none;
+    cursor: pointer;
+}
+
+.appSearchBar>input:focus,
+.appSearchBar>.clear:focus {
     outline: none;
     border: none;
     border-bottom: solid 3px white;
@@ -294,13 +307,118 @@ body {
 .text-8 { font-size: 2.75rem; }
 .text-9 { font-size: 3.00rem; }
 
-/* ==================== IMAGE CLASSES ==================== */
-.card-img-cover {
+/* ==================== MOVIE CARD STYLES ==================== */
+.movieCard {
+    aspect-ratio: 9/16;
+    background-color: #555;
+    color: white;
+    overflow: hidden;
+    position: relative;
+    border-radius: 0.5rem;
+}
+
+.movieCard img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.movieCard .card-img-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: rgba(0, 0, 0, 0.3);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0.9) 100%);
+    text-align: center;
+    font-weight: 400;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    flex-direction: column;
+    justify-content: space-between;
+    display: flex;
+    opacity: 0;
+    transition: opacity 200ms;
+}
+
+.movieCard:hover .card-img-overlay,
+.movieCard:focus-within .card-img-overlay {
+    background: rgba(0, 0, 0, 0.8);
+    opacity: 1;
+}
+
+.card-img-overlay .info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.card-img-overlay label {
+    width: 100%;
+    font-size: 1rem;
+    line-height: 1.2rem;
+    height: 2.4rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+}
+
+.card-img-overlay time {
+    font-size: 0.6rem;
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.card-img-overlay small {
+    color: gold;
+    font-size: 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.card-img-overlay p {
+    font-size: 0.8rem;
+    line-height: 1rem;
+    height: 10rem;
+    overflow: hidden;
+}
+
+.movieCard .providers {
+    display: flex;
+    flex-direction: row;
+    height: 5.5rem;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: self-end;
+    width: 100%;
+    margin-bottom: 0.4rem;
+}
+
+.movieCard .providers a {
+    font-size: 1rem;
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+.movieCard .provider-icon {
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.movieCard .provider-icon img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
-.card-img-contain {
-    object-fit: contain;
+.movieCard .provider-icon:focus {
+    outline: none;
+    border: solid 2px white;
+}
+
+/* ==================== IMAGE CLASSES ==================== */
+.card-img-cover {
+    object-fit: cover;
 }
 
 .card-img-contain {

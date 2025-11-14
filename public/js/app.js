@@ -10,10 +10,41 @@ const app = createApp({
             alerts: [],
             alertIdCounter: 0,
             searchString: '',
+            results: [],
             
             // Config
             apiBase: '/api',
-            refreshInterval: null
+            refreshInterval: null,
+            
+            // TMDb API
+            tmdbApiUrl: 'https://api.themoviedb.org/3',
+            imageUrl: 'https://image.tmdb.org/t/p/w500/',
+            tmdbOptions: {
+                method: 'GET',
+                headers: {
+                    accept: 'application/json',
+                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDk3OWE4YWI3YzEyYTc1MWYxZjVhZTZjMzM4ZGU0ZCIsInN1YiI6IjY1NmRiZjhkNGE0YmY2MDEwMzUxMTc0ZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.NQ5B3w-U4U5Uwg3nCOX7asEO-psqD_ken-kkZrHFZSA'
+                },
+            },
+            availableProviders: [
+                { condition: "always", provide_name: "Streaming Unity", url: "https://streamingunity.co/search?q=%query%", logo_path: "https://streamingunity.co/img/logo.png" },
+                { condition: "empty", provide_name: "Google", url: "https://www.google.com/search?q=dove+guardare+%query%", logo_path: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/240px-Google_%22G%22_logo.svg.png" },
+                { provider_id: 337, provider_name: "Disney Plus", url: "https://www.google.com/search?q=%query%+site:disneyplus.com" },
+                { provider_id: 8, provider_name: "Netflix", url: "https://www.netflix.com/search?q=%query%" },
+                { provider_id: 2, provider_name: "Apple TV", url: "https://tv.apple.com/search?term=%query%" },
+                { provider_id: 350, provider_name: "Apple TV Plus", url: "https://tv.apple.com/search?term=%query%" },
+                { provider_id: 3, provider_name: "Google Play Movies", url: "https://play.google.com/store/search?q=%query%&c=movies&hl=it" },
+                { provider_id: 39, provider_name: "Now TV", url: "https://www.google.com/search?q=%query%+site:nowtv.it" },
+                { provider_id: 222, provider_name: "Rai Play", url: "https://www.raiplay.it/ricerca.html?q=%query%" },
+                { provider_id: 188, provider_name: "YouTube Premium", url: "https://www.youtube.com/results?search_query=%query%" },
+                { provider_id: 68, provider_name: "Microsoft Store", url: "https://www.microsoft.com/it-it/search/shop/movies?q=%query%" },
+                { provider_id: 119, provider_name: "Amazon Prime Video", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
+                { provider_id: 10, provider_name: "Amazon Video Fallback?", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
+                { provider_id: 531, provider_name: "Paramount Plus", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
+                { provider_id: 582, provider_name: "Paramount+ Amazon Channel", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
+                { provider_id: 584, provider_name: "Discovery+ Amazon Channel", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
+                { provider_id: 283, provider_name: "Crunchyroll", url: "https://www.crunchyroll.com/it/search?q=%query%" },
+            ]
         };
     },
     computed: {
@@ -33,11 +64,106 @@ const app = createApp({
         }
     },
     methods: {
-        // ==================== FILTER ====================
-        filterCommands() {
-            // La filtrazione è gestita dal computed filteredCommands
-            // Questo metodo esiste per eventuali azioni aggiuntive
+        // ==================== SEARCH ====================
+        search() {
+            this.results = [];
+
+            if (this.searchString.length >= 3) {
+                fetch(`${this.tmdbApiUrl}/search/multi?query=${encodeURIComponent(this.searchString)}&include_adult=true&language=it-IT&page=1&region=it-IT`, this.tmdbOptions)
+                    .then(r => r.json())
+                    .then(r => {
+                        this.results = r.results.filter(item => item.media_type !== "person");
+                    })
+                    .then(() => {
+                        this.getProviders();
+                    })
+                    .catch(err => {
+                        console.error('Search error:', err);
+                    });
+            }
         },
+        
+        clearSearch() {
+            this.results = [];
+            this.searchString = '';
+        },
+        
+        getProviders() {
+            this.results.forEach(element => {
+                fetch(`${this.tmdbApiUrl}/${element.media_type}/${element.id}/watch/providers`, this.tmdbOptions)
+                    .then(r => r.json())
+                    .then(r => {
+                        let i = this.results.findIndex(x => x.id == element.id);
+                        if (this.results[i]) {
+                            this.results[i].providers = this.filterProviders(r.results.IT);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Providers error:', err);
+                    });
+            });
+        },
+        
+        filterProviders(providers) {
+            let result = {
+                flatrate: []
+            };
+
+            if (providers) {
+                if (providers.flatrate) {
+                    let flatrate = providers.flatrate.filter(provider => {
+                        return this.availableProviders.find(x => x.provider_id == provider.provider_id);
+                    }).map(provider => {
+                        provider.logo_path = this.imageUrl + provider.logo_path;
+                        provider.url = this.availableProviders.find(x => x.provider_id == provider.provider_id).url;
+                        return provider;
+                    });
+                    result.flatrate = flatrate;
+                }
+            }
+
+            // Always
+            result.flatrate.push(...this.availableProviders.filter(x => x.condition == "always"));
+
+            // Fallback
+            if (result.flatrate.length == 1) {
+                result.flatrate.push(...this.availableProviders.filter(x => x.condition == "empty"));
+            }
+
+            return result;
+        },
+        
+        parseUrl(url, name) {
+            return url.replace("%query%", encodeURIComponent(name));
+        },
+        
+        parseDate(date) {
+            return new Date(date).getFullYear();
+        },
+        
+        parseStars(stars) {
+            return Math.round(stars) / 2;
+        },
+        
+        parseDescription(desc, size) {
+            size--;
+            if (desc.length <= size) {
+                return desc;
+            }
+
+            desc = desc.slice(0, desc.lastIndexOf("."));
+
+            while (desc.length > size) {
+                if (desc.lastIndexOf(".") > 0) {
+                    desc = desc.slice(0, desc.lastIndexOf("."));
+                } else {
+                    desc = "Ash nazg durbatulûk, ash nazg gimbatul, ash nazg thrakatulûk agh burzum-ishi krimpatul.";
+                    break;
+                }
+            }
+            return desc + ".";
+        },
+        
         // ==================== API CALLS ====================
         async loadCommands() {
             try {
