@@ -16,6 +16,7 @@ const CommandCard = {
            @click="handleCardClick"
            tabindex="0"
            @keydown.enter="handleCardClick">
+           <div class="hover-wrapper">
             
             <!-- Status Badge - solo se running -->
             <div v-if="command.isRunning" 
@@ -26,34 +27,45 @@ const CommandCard = {
                 <i class="fas fa-stop stop-icon"></i>
             </div>
 
-            <!-- Card Content con immagine -->
-            <img v-if="command.img"
-                :src="command.img.src" 
-                :alt="command.name"
-                :class="command.img.class"
+            <!-- Card Content -->
+            <component 
+                :is="iconComponent"
+                v-if="command.icon"
+                :src="command.icon.src"
+                :alt="iconComponent === 'img' ? (command.text?.name || command.name) : undefined"
+                :aria-label="iconComponent === 'i' ? (command.text?.name || command.name) : undefined"
+                :class="command.icon.class"
+                :style="command.icon.style"
                 @error="handleImageError"
+            />
+            <label 
+                v-if="command.text?.visible !== false"
+                :class="command.text?.class" 
+                :style="command.text?.style"
             >
-            <!-- Card Content con icona e testo -->
-            <span v-else>
-                <i v-if="command.icon" :class="command.icon.class"></i>
-                <label :class="command.text?.class">{{ command.text?.name || command.name }}</label>
-            </span>
+                {{ command.text?.name || command.name }}
+            </label>
+            </div>
         </a>
     `,
     computed: {
+        iconComponent() {
+            // Determina il componente da usare: 'img' o 'i'
+            return this.command.icon?.type || 'i';
+        },
         cardStyle() {
             // Usa gli stili da tile.style se presenti
             if (this.command.tile && this.command.tile.style) {
                 return this.command.tile.style;
             }
-            
+
             // Fallback: genera colori dinamici basati sull'ID del comando
             const colors = [
                 '#667eea', '#764ba2', '#f093fb', '#4facfe',
                 '#43e97b', '#fa709a', '#fee140', '#30cfd0'
             ];
             const bgColor = colors[this.command.id % colors.length];
-            
+
             return {
                 backgroundColor: bgColor,
                 color: '#FFFFFF'
@@ -64,8 +76,12 @@ const CommandCard = {
             return this.command.tile?.class || '';
         },
         cardHref() {
-            // Usa href da tile.href se presente (per link esterni)
-            return this.command.tile?.href || null;
+            // Se action.type non è specificato o è 'link', usa action.value come href
+            if (!this.command.action?.value) {
+                return null; // Value vuoto = non fare nulla
+            }
+            const actionType = this.command.action?.type || 'link'; // Default a 'link'
+            return actionType === 'link' ? this.command.action.value : null;
         }
     },
     methods: {
@@ -97,16 +113,21 @@ const CommandCard = {
             if (this.cardHref) {
                 return; // Il link si aprirà normalmente
             }
-            
-            // Altrimenti gestisci come comando
+
+            // Previeni comportamento di default per comandi
             event.preventDefault();
-            
+
+            // Se action.value è vuoto, non fare nulla
+            if (!this.command.action?.value) {
+                return;
+            }
+
             if (this.command.isRunning) {
                 // Se running, fa focus
                 this.$emit('focus', this.command.pid, this.command.name);
             } else {
                 // Se stopped, esegue
-                this.$emit('execute', this.command.id, this.command.name, this.command.requiresConfirmation);
+                this.$emit('execute', this.command.id, this.command.name, this.command.action?.requiresConfirmation || false);
             }
         },
         handleStop(event) {

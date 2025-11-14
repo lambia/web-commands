@@ -176,10 +176,6 @@ body {
 /* ==================== COMMAND CARD ==================== */
 .appCard {
     aspect-ratio: 16/9;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
     background-color: teal;
     color: white;
     overflow: hidden;
@@ -192,11 +188,20 @@ body {
     text-decoration: none;
 }
 
+.appCard .hover-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
 .appCard:focus,
 .appCard:hover {
     outline: solid 4px white;
     outline-offset: -4px;
-    transform: scale(1.02);
+    z-index: 999;
 }
 
 /* ==================== CARD CONTENT ==================== */
@@ -206,41 +211,23 @@ body {
     height: 100%;
 }
 
-.appCard img, .appCard span {
+.appCard img, .appCard i, .appCard label, .appCard .hover-wrapper {
     transition: all 200ms;
 }
 
-.appCard img {
-    transform: scale(0.85);
-}
-
-.appCard:focus img,
-.appCard:hover img {
-    transform: scale(1);
-}
-
-.appCard span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    font-weight: 300;
-    transition: all 200ms;
-}
-
-.appCard:focus span,
-.appCard:hover span {
-    transform: scale(1);
-}
-
-.appCard span>i {
+.appCard i {
     padding: 0 0.3rem;
 }
 
-.appCard span>label {
+.appCard label {
     cursor: pointer;
     font-weight: 300;
     padding: 0 0.3rem;
+}
+
+.appCard:focus .hover-wrapper,
+.appCard:hover .hover-wrapper {
+    transform: scale(1.15);
 }
 
 /* ==================== STATUS BADGE ==================== */

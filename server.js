@@ -102,11 +102,11 @@ function processExists(pid, processName = null) {
 function runCommand(cmd) {
 	return new Promise((resolve, reject) => {
 		try {
-			logger.info(`Esecuzione comando: ${cmd.name} (${cmd.command})`);
+			logger.info(`Esecuzione comando: ${cmd.name} (${cmd.action?.value})`);
 			
 			// Se è un comando PowerShell script, eseguilo ma non tracciarlo
-			if (cmd.command.includes('powershell.exe') && cmd.command.includes('.ps1')) {
-				exec(cmd.command, { cwd: __dirname }, (err, stdout, stderr) => {
+			if (cmd.action?.value?.includes('powershell.exe') && cmd.action?.value?.includes('.ps1')) {
+				exec(cmd.action.value, { cwd: __dirname }, (err, stdout, stderr) => {
 					if (err) {
 						logger.error(`Errore esecuzione comando ${cmd.name}:`, stderr || err);
 						return reject(err);
@@ -130,7 +130,7 @@ function runCommand(cmd) {
 					})();
 					
 					// Avvia il comando tramite cmd.exe con start
-					const cmdCommand = `cmd.exe /c start "" "${cmd.command}"`;
+					const cmdCommand = `cmd.exe /c start "" "${cmd.action.value}"`;
 					
 					// Usa exec ma ignora output (più veloce di spawn detached)
 					exec(cmdCommand, { windowsHide: true }, (err, stdout, stderr) => {

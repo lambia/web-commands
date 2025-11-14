@@ -1,12 +1,16 @@
 {
   "port": 3000,
-  "corsOrigins": ["http://localhost:3000"],
+  "corsOrigins": [
+    "http://localhost:3000"
+  ],
   "commands": [
     {
       "id": 2,
       "name": "Stremio",
-      "command": "%USERPROFILE%\\AppData\\Local\\Programs\\Stremio\\stremio-shell-ng.exe",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "command",
+        "value": "%USERPROFILE%\\AppData\\Local\\Programs\\Stremio\\stremio-shell-ng.exe"
+      },
       "visible": true,
       "tile": {
         "style": {
@@ -15,19 +19,24 @@
         },
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/jack-rackham.svg",
         "class": "card-img-contain card-img-light"
       },
       "text": {
-        "name": "Stremio"
+        "visible": false,
+        "name": "Stremio",
+        "class": "text-3"
       }
     },
     {
       "id": 3,
       "name": "Steam",
-      "command": "steam://open/bigpicture",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "command",
+        "value": "steam://open/bigpicture"
+      },
       "visible": true,
       "tile": {
         "style": {
@@ -36,20 +45,24 @@
         },
         "class": "card-padding-thin"
       },
-      "text": {
-        "name": "Steam",
-        "class": "text-4"
-      },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/steam.svg",
         "class": "card-img-contain card-img-light"
+      },
+      "text": {
+        "visible": false,
+        "name": "Steam",
+        "class": "text-4"
       }
     },
     {
       "id": 8,
       "name": "Spotify",
-      "command": "shell:AppsFolder\\SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "command",
+        "value": "shell:AppsFolder\\SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify"
+      },
       "visible": true,
       "tile": {
         "style": {
@@ -58,19 +71,23 @@
         },
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/spotify.svg",
         "class": "card-img-contain card-img-light"
       },
       "text": {
+        "visible": false,
         "name": "Spotify"
       }
     },
     {
       "id": 15,
       "name": "VLC",
-      "command": "vlc",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "command",
+        "value": "vlc"
+      },
       "visible": true,
       "tile": {
         "style": {
@@ -79,177 +96,206 @@
         },
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/vlc.svg",
-        "class": "card-img-contain"
+        "class": "card-img-contain",
+        "style": {
+          "maxHeight": "5rem",
+          "width": "auto"
+        }
       },
       "text": {
+        "visible": true,
         "name": "VLC",
         "class": "text-7"
-      },
-      "icon": {
-        "class": "fa-solid fa-circle-play text-9"
       }
     },
     {
       "id": 1,
       "name": "Streaming Community",
-      "command": "",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "link",
+        "value": "https://streamingcommunity.support/"
+      },
       "visible": true,
       "tile": {
         "style": {
-          "backgroundColor": "#000000",
-          "color": "#FFFFFF"
+          "backgroundColor": "#0055ff",
+          "color": "white"
         },
-        "href": "https://streamingcommunity.support/",
         "class": "card-padding-thin"
       },
-      "text": {
-        "name": "Streaming Community",
-        "class": "text-3"
-      },
       "icon": {
+        "type": "i",
         "class": "fa-solid fa-play-circle text-7"
+      },
+      "text": {
+        "visible": true,
+        "name": "Streaming Unity",
+        "class": "text-1",
+        "style": {
+          "font-weight": "400"
+        }
       }
     },
     {
       "id": 4,
       "name": "Disney+",
-      "command": "",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "link",
+        "value": "https://www.disneyplus.com/it-it/home"
+      },
       "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#020C6F",
           "color": "#FFFFFF"
         },
-        "href": "https://www.disneyplus.com/it-it/home",
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/disney-plus.svg",
         "class": "card-img-contain card-img-light"
       },
       "text": {
+        "visible": false,
         "name": "Disney+"
       }
     },
     {
       "id": 5,
       "name": "Netflix",
-      "command": "",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "link",
+        "value": "https://netflix.com/"
+      },
       "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#000000",
           "color": "#FFFFFF"
         },
-        "href": "https://netflix.com/",
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/netflix.svg",
         "class": "card-img-contain"
       },
       "text": {
+        "visible": false,
         "name": "Netflix"
       }
     },
     {
       "id": 6,
       "name": "Now TV",
-      "command": "",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "link",
+        "value": "https://www.nowtv.it/"
+      },
       "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#00818A",
           "color": "#FFFFFF"
         },
-        "href": "https://www.nowtv.it/",
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/now-tv.svg",
         "class": "card-img-contain card-img-light"
       },
       "text": {
+        "visible": false,
         "name": "Now TV"
       }
     },
     {
       "id": 7,
       "name": "Prime Video",
-      "command": "",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "link",
+        "value": "https://www.primevideo.com/"
+      },
       "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#00A8E1",
           "color": "#FFFFFF"
         },
-        "href": "https://www.primevideo.com/",
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/prime-video.svg",
         "class": "card-img-contain card-img-light"
       },
       "text": {
+        "visible": false,
         "name": "Prime Video"
       }
     },
     {
       "id": 9,
       "name": "YouTube",
-      "command": "",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "link",
+        "value": "https://youtube.com/"
+      },
       "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#FF0000",
           "color": "#FFFFFF"
         },
-        "href": "https://youtube.com/",
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/youtube.svg",
         "class": "card-img-contain"
       },
       "text": {
+        "visible": false,
         "name": "Youtube"
       }
     },
     {
       "id": 10,
       "name": "Google",
-      "command": "",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "link",
+        "value": "https://www.google.it"
+      },
       "visible": true,
       "tile": {
         "style": {
           "backgroundColor": "#FFFFFF",
           "color": "#000000"
         },
-        "href": "https://www.google.it",
         "class": "card-padding-thin"
       },
-      "img": {
+      "icon": {
+        "type": "img",
         "src": "./icons/google.svg",
         "class": "card-img-contain"
       },
       "text": {
+        "visible": false,
         "name": "Google"
       }
     },
     {
       "id": 11,
       "name": "Settings",
-      "command": "",
-      "requiresConfirmation": false,
+      "action": {
+        "type": "link",
+        "value": ""
+      },
       "visible": true,
       "tile": {
         "style": {
@@ -258,19 +304,24 @@
         },
         "class": "card-padding-thin"
       },
+      "icon": {
+        "type": "i",
+        "class": "fa-solid fa-cog text-7"
+      },
       "text": {
+        "visible": true,
         "name": "Settings",
         "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-cog text-7"
       }
     },
-    { 
-      "id": 12, 
-      "name": "Sleep", 
-      "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
-      "requiresConfirmation": true,
+    {
+      "id": 12,
+      "name": "Sleep",
+      "action": {
+        "type": "command",
+        "value": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0",
+        "requiresConfirmation": true
+      },
       "visible": true,
       "tile": {
         "style": {
@@ -279,19 +330,24 @@
         },
         "class": "card-padding-thin"
       },
+      "icon": {
+        "type": "i",
+        "class": "fa-solid fa-moon text-7"
+      },
       "text": {
+        "visible": true,
         "name": "Sleep",
         "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-moon text-7"
       }
     },
-    { 
-      "id": 13, 
-      "name": "Hibernate", 
-      "command": "shutdown /h",
-      "requiresConfirmation": true,
+    {
+      "id": 13,
+      "name": "Hibernate",
+      "action": {
+        "type": "command",
+        "value": "shutdown /h",
+        "requiresConfirmation": true
+      },
       "visible": false,
       "tile": {
         "style": {
@@ -300,19 +356,24 @@
         },
         "class": "card-padding-thin"
       },
+      "icon": {
+        "type": "i",
+        "class": "fa-solid fa-bed text-7"
+      },
       "text": {
+        "visible": true,
         "name": "Hibernate",
         "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-bed text-7"
       }
     },
-    { 
-      "id": 14, 
-      "name": "Shutdown", 
-      "command": "shutdown /s /t 0",
-      "requiresConfirmation": true,
+    {
+      "id": 14,
+      "name": "Shutdown",
+      "action": {
+        "type": "command",
+        "value": "shutdown /s /t 0",
+        "requiresConfirmation": true
+      },
       "visible": true,
       "tile": {
         "style": {
@@ -321,12 +382,14 @@
         },
         "class": "card-padding-thin"
       },
+      "icon": {
+        "type": "i",
+        "class": "fa-solid fa-power-off text-7"
+      },
       "text": {
+        "visible": true,
         "name": "Shutdown",
         "class": "text-4"
-      },
-      "icon": {
-        "class": "fa-solid fa-power-off text-7"
       }
     }
   ]
