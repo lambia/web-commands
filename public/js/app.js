@@ -27,7 +27,8 @@ const app = createApp({
                 },
             },
             availableProviders: [
-                { condition: "always", provide_name: "Streaming Unity", url: "https://streamingunity.co/search?q=%query%", logo_path: "https://streamingunity.co/img/logo.png" },
+                { condition: "always", provide_name: "Stremio", url: "stremio:///search?search=%query%", logo_path: "./icons/jack-rackham.svg",},
+                { condition: "always", provide_name: "Streaming Unity", url: "https://streamingunity.co/search?q=%query%", logo_path: "./icons/streaming-unity.png" },
                 { condition: "empty", provide_name: "Google", url: "https://www.google.com/search?q=dove+guardare+%query%", logo_path: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/240px-Google_%22G%22_logo.svg.png" },
                 { provider_id: 337, provider_name: "Disney Plus", url: "https://www.google.com/search?q=%query%+site:disneyplus.com" },
                 { provider_id: 8, provider_name: "Netflix", url: "https://www.netflix.com/search?q=%query%" },
@@ -40,9 +41,9 @@ const app = createApp({
                 { provider_id: 68, provider_name: "Microsoft Store", url: "https://www.microsoft.com/it-it/search/shop/movies?q=%query%" },
                 { provider_id: 119, provider_name: "Amazon Prime Video", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
                 { provider_id: 10, provider_name: "Amazon Video Fallback?", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
-                { provider_id: 531, provider_name: "Paramount Plus", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
-                { provider_id: 582, provider_name: "Paramount+ Amazon Channel", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
-                { provider_id: 584, provider_name: "Discovery+ Amazon Channel", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
+                // { provider_id: 531, provider_name: "Paramount Plus", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
+                // { provider_id: 582, provider_name: "Paramount+ Amazon Channel", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
+                // { provider_id: 584, provider_name: "Discovery+ Amazon Channel", url: "https://www.primevideo.com/-/it/search/ref=atv_nb_sug?phrase=%query%" },
                 { provider_id: 283, provider_name: "Crunchyroll", url: "https://www.crunchyroll.com/it/search?q=%query%" },
             ]
         };
