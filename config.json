@@ -5,7 +5,7 @@
   ],
   "commands": [
     {
-      "id": 2,
+      "id": 1,
       "name": "Stremio",
       "action": {
         "type": "command",
@@ -31,7 +31,7 @@
       }
     },
     {
-      "id": 3,
+      "id": 2,
       "name": "Steam",
       "action": {
         "type": "command",
@@ -57,7 +57,7 @@
       }
     },
     {
-      "id": 8,
+      "id": 3,
       "name": "Spotify",
       "action": {
         "type": "command",
@@ -82,7 +82,7 @@
       }
     },
     {
-      "id": 15,
+      "id": 4,
       "name": "VLC",
       "action": {
         "type": "command",
@@ -112,7 +112,7 @@
       }
     },
     {
-      "id": 1,
+      "id": 5,
       "name": "Streaming Community",
       "action": {
         "type": "link",
@@ -140,7 +140,7 @@
       }
     },
     {
-      "id": 4,
+      "id": 6,
       "name": "Disney+",
       "action": {
         "type": "link",
@@ -165,7 +165,7 @@
       }
     },
     {
-      "id": 5,
+      "id": 7,
       "name": "Netflix",
       "action": {
         "type": "link",
@@ -190,7 +190,7 @@
       }
     },
     {
-      "id": 6,
+      "id": 8,
       "name": "Now TV",
       "action": {
         "type": "link",
@@ -215,7 +215,7 @@
       }
     },
     {
-      "id": 7,
+      "id": 9,
       "name": "Prime Video",
       "action": {
         "type": "link",
@@ -240,7 +240,7 @@
       }
     },
     {
-      "id": 9,
+      "id": 10,
       "name": "YouTube",
       "action": {
         "type": "link",
@@ -265,7 +265,7 @@
       }
     },
     {
-      "id": 10,
+      "id": 11,
       "name": "Google",
       "action": {
         "type": "link",
@@ -290,11 +290,11 @@
       }
     },
     {
-      "id": 11,
+      "id": 12,
       "name": "Settings",
       "action": {
         "type": "link",
-        "value": ""
+        "value": "javascript:alert('Settings clicked!');"
       },
       "visible": true,
       "tile": {
@@ -315,7 +315,7 @@
       }
     },
     {
-      "id": 12,
+      "id": 13,
       "name": "Sleep",
       "action": {
         "type": "command",
@@ -341,7 +341,7 @@
       }
     },
     {
-      "id": 13,
+      "id": 14,
       "name": "Hibernate",
       "action": {
         "type": "command",
@@ -367,7 +367,7 @@
       }
     },
     {
-      "id": 14,
+      "id": 15,
       "name": "Shutdown",
       "action": {
         "type": "command",
