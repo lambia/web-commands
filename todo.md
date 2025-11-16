@@ -1,5 +1,17 @@
 # ToDo
 
+1. in electron quando cambio pagina se premo alt + freccia sx, non torna indietro
+2. si può in qualche modo mostrare la barra degli strumenti? non farlo, solo info
+3. l'app mi sembra lenta in caricamento. migliora con la build?
+4. spiegami e motiva tutte le dipendenze del progetto
+
+aggiungi una toolbar in alto in position fixed, centrata con queste icone:
+- back e next che triggerano la navigazione di electron
+- home che riporta alla home page
+- search che triggera focus sul search
+- settings che non fa nulla per ora
+toolbar minimale: niente background. icone fontawesome senza background o bordi. 
+
 # in corso
 - titolo, icona
 - aggiungi un api che permetta di modificare la configurazione. si devono poter fare le CRUD dei comandi disponibili e l'upload dei file immagine

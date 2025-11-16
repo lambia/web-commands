@@ -1,11 +1,15 @@
-const express = require('express');
-const { spawn, exec, execFile } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const winston = require('winston');
+import express from 'express';
+import { spawn, exec, execFile } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import winston from 'winston';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Setup logger
 const logger = winston.createLogger({
@@ -27,7 +31,8 @@ const logger = winston.createLogger({
 // Carica configurazione
 let config;
 try {
-	const configPath = path.join(__dirname, 'config.json');
+	// Path relativo alla root del progetto
+	const configPath = path.join(__dirname, '../../config.json');
 	config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 	logger.info('Configurazione caricata con successo');
 } catch (error) {
@@ -36,19 +41,58 @@ try {
 }
 
 const app = express();
-const PORT = config.port || 3000;
+const PORT = 2303; // Porta fissa per Electron
+
+// CORS configuration - deve essere PRIMA di helmet
+const corsOptions = {
+	origin: function (origin, callback) {
+		const allowedOrigins = config.corsOrigins || ['http://localhost:3000', 'http://localhost:5173'];
+		logger.info(`CORS request from origin: ${origin}`);
+		logger.info(`Allowed origins: ${JSON.stringify(allowedOrigins)}`);
+		
+		// Allow requests with no origin (like mobile apps, curl, Postman, or same-origin)
+		if (!origin) return callback(null, true);
+		
+		if (allowedOrigins.indexOf(origin) !== -1) {
+			callback(null, true);
+		} else {
+			logger.warn(`CORS blocked origin: ${origin}`);
+			callback(new Error('Not allowed by CORS'));
+		}
+	},
+	methods: ['GET', 'POST', 'OPTIONS'],
+	credentials: true,
+	optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 // Middleware di sicurezza - Helmet senza CSP (che blocca inline scripts)
 app.use(helmet({
 	contentSecurityPolicy: false  // Disabilita CSP per permettere script inline
 }));
-app.use(cors({
-	origin: config.corsOrigins || ['http://localhost:3000'],
-	methods: ['GET', 'POST'],
-	credentials: true
-}));
+
 app.use(express.json());
-app.use(express.static('public'));
+
+// Serve static files with CORS headers
+app.use(express.static('public', {
+	setHeaders: (res, path, stat) => {
+		// Add CORS headers for all static files
+		const allowedOrigins = config.corsOrigins || ['http://localhost:3000', 'http://localhost:5173'];
+		const origin = res.req.headers.origin;
+		
+		// Allow requests with origin from allowed list
+		if (origin && allowedOrigins.indexOf(origin) !== -1) {
+			res.set('Access-Control-Allow-Origin', origin);
+		} else if (!origin) {
+			// Allow requests without origin (direct requests, like img tags)
+			res.set('Access-Control-Allow-Origin', '*');
+		}
+		
+		res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+		res.set('Access-Control-Allow-Credentials', 'true');
+	}
+}));
 
 // Rate limiting - DISABILITATO per sviluppo
 // const limiter = rateLimit({
@@ -106,7 +150,7 @@ function runCommand(cmd) {
 			
 			// Se è un comando PowerShell script, eseguilo ma non tracciarlo
 			if (cmd.action?.value?.includes('powershell.exe') && cmd.action?.value?.includes('.ps1')) {
-				exec(cmd.action.value, { cwd: __dirname }, (err, stdout, stderr) => {
+				exec(cmd.action.value, { cwd: path.join(__dirname, '../..') }, (err, stdout, stderr) => {
 					if (err) {
 						logger.error(`Errore esecuzione comando ${cmd.name}:`, stderr || err);
 						return reject(err);
@@ -133,7 +177,8 @@ function runCommand(cmd) {
 					const cmdCommand = `cmd.exe /c start "" "${cmd.action.value}" ${cmd.action.arguments || ''}`;
 					
 					// Usa exec ma ignora output (più veloce di spawn detached)
-					exec(cmdCommand, { windowsHide: true }, (err, stdout, stderr) => {
+					// Aggiusta il working directory alla root del progetto
+					exec(cmdCommand, { windowsHide: true, cwd: path.join(__dirname, '../..') }, (err, stdout, stderr) => {
 						// Logga solo errori veri (non output dell'app)
 						if (err && err.code !== 0) {
 							const errorMsg = err.message || stderr || 'Unknown error';
@@ -312,7 +357,7 @@ app.get('/api/running', (req, res) => {
 app.get('/api/windows', (req, res) => {
 	try {
 		logger.info('Richiesta lista finestre aperte');
-		const scriptPath = path.join(__dirname, 'scripts', 'list-windows.ps1');
+		const scriptPath = path.join(__dirname, '../../scripts', 'list-windows.ps1');
 		
 		exec(`powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}"`, (err, stdout, stderr) => {
 			if (err) {
@@ -355,7 +400,7 @@ app.post('/api/check-commands', (req, res) => {
 		}
 		
 		logger.info(`Controllo ${commandsToCheck.length} comandi in esecuzione`);
-		const scriptPath = path.join(__dirname, 'scripts', 'check-commands.ps1');
+		const scriptPath = path.join(__dirname, '../../scripts', 'check-commands.ps1');
 		const commandsJson = JSON.stringify(commandsToCheck);
 		
 		execFile('powershell.exe', [
@@ -416,7 +461,7 @@ app.post('/api/focus/:pid', async (req, res) => {
 	}
 	
 	logger.info(`Tentativo focus finestra PID: ${pid}${processName ? `, Nome: ${processName}` : ''}${windowTitle ? `, Titolo: ${windowTitle}` : ''}`);
-	const scriptPath = path.join(__dirname, 'scripts', 'focus-window-by-pid.ps1');
+	const scriptPath = path.join(__dirname, '../../scripts', 'focus-window-by-pid.ps1');
 	
 	// Passa window title se disponibile (per UWP apps), altrimenti nome processo
 	let psCommand = `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -ProcessPid ${pid}`;
@@ -587,26 +632,39 @@ app.use((err, req, res, next) => {
 	});
 });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-	logger.info('SIGTERM ricevuto, chiusura server...');
-	server.close(() => {
-		logger.info('Server chiuso');
-		process.exit(0);
-	});
-});
+// Variabile per il server HTTP
+let server = null;
 
-process.on('SIGINT', () => {
-	logger.info('SIGINT ricevuto, chiusura server...');
-	server.close(() => {
-		logger.info('Server chiuso');
-		process.exit(0);
+// Funzione per avviare il server
+function startServer() {
+	return new Promise((resolve, reject) => {
+		server = app.listen(PORT, '127.0.0.1', (err) => {
+			if (err) {
+				logger.error('Errore avvio server:', err);
+				return reject(err);
+			}
+			logger.info(`Server in ascolto su http://127.0.0.1:${PORT} (loopback only)`);
+			logger.info(`Caricati ${config.commands.length} comandi`);
+			logger.info('⚠️ Server accessibile SOLO localmente, NON dalla rete');
+			resolve(server);
+		});
 	});
-});
+}
 
-// Avvio server - SOLO su loopback (127.0.0.1) per sicurezza
-const server = app.listen(PORT, '127.0.0.1', () => {
-	logger.info(`Server in ascolto su http://127.0.0.1:${PORT} (loopback only)`);
-	logger.info(`Caricati ${config.commands.length} comandi`);
-	logger.info('⚠️ Server accessibile SOLO localmente, NON dalla rete');
-});
+// Funzione per chiudere il server
+function stopServer() {
+	return new Promise((resolve) => {
+		if (server) {
+			logger.info('Chiusura server Express...');
+			server.close(() => {
+				logger.info('Server Express chiuso');
+				resolve();
+			});
+		} else {
+			resolve();
+		}
+	});
+}
+
+// Esporta per Electron
+export { startServer, stopServer, logger };
