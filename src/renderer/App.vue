@@ -15,6 +15,7 @@
       <!-- Search Bar -->
       <header class="appSearchBar">
         <input 
+          ref="searchInput"
           type="text" 
           placeholder="Search..." 
           v-model="searchString"
@@ -143,6 +144,9 @@ export default {
     clearSearch() {
       this.results = [];
       this.searchString = '';
+      this.$nextTick(() => {
+        this.$refs.searchInput.focus();
+      });
     },
     
     getProviders() {
