@@ -1,8 +1,70 @@
+# Dependencies
 node_modules/
+package-lock.json
+
+# Logs
 *.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# Vite
+.vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Electron build output
+release/
+out/
+build/
+app/
+
+# Electron-builder
+.electron-builder.yaml
+electron-builder.yml
+
+# OS files
 .DS_Store
 Thumbs.db
-*.bak
+desktop.ini
+*.swp
+*.swo
+*~
+
+# Temporary files
 *.tmp
-package-lock.json
+*.bak
+*.cache
+.cache/
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.seed
+*.pid
+*.pid.lock
