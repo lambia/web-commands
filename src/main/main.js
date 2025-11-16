@@ -77,6 +77,19 @@ async function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  // Enable navigation shortcuts (Alt+Left/Right for back/forward)
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.alt) {
+      if (input.key === 'ArrowLeft' && mainWindow.webContents.canGoBack()) {
+        mainWindow.webContents.goBack();
+        event.preventDefault();
+      } else if (input.key === 'ArrowRight' && mainWindow.webContents.canGoForward()) {
+        mainWindow.webContents.goForward();
+        event.preventDefault();
+      }
+    }
+  });
 }
 
 app.whenReady().then(() => {
