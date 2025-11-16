@@ -21,6 +21,10 @@ async function createWindow() {
     return;
   }
 
+  // Check if in development mode
+  // In dev usa Vite, in prod usa i file compilati
+  const isDev = process.env.VITE_DEV_SERVER_URL !== undefined;
+
   mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
@@ -33,31 +37,41 @@ async function createWindow() {
     }
   });
 
-  // Set Content Security Policy
+  // Set Content Security Policy based on environment
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const csp = isDev ? [
+      // Development CSP
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' http://localhost:5173; " +
+      "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com; " +
+      "connect-src 'self' http://localhost:5173 http://127.0.0.1:2303 ws://localhost:5173; " +
+      "img-src 'self' data: http://localhost:5173 http://127.0.0.1:2303 file:; " +
+      "font-src 'self' data: https://fonts.gstatic.com;"
+    ] : [
+      // Production CSP
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline'; " +
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+      "connect-src 'self' http://127.0.0.1:2303; " +
+      "img-src 'self' data: http://127.0.0.1:2303 file:; " +
+      "font-src 'self' data: https://fonts.gstatic.com;"
+    ];
+
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        'Content-Security-Policy': [
-          "default-src 'self'; " +
-          "script-src 'self' 'unsafe-inline' http://localhost:5173; " +
-          "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com; " +
-          "connect-src 'self' http://localhost:5173 http://127.0.0.1:2303 ws://localhost:5173; " +
-          "img-src 'self' data: http://localhost:5173 http://127.0.0.1:2303 file:; " +
-          "font-src 'self' data: https://fonts.gstatic.com;"
-        ]
+        'Content-Security-Policy': csp
       }
     });
   });
-
-  // In development, load from Vite dev server
-  // In production, load from built files
-  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   
   if (isDev) {
+    logger.info('Modalità development: caricamento da Vite dev server');
     mainWindow.loadURL('http://localhost:5173');
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
+    const distPath = path.join(__dirname, '../../dist/index.html');
+    logger.info(`Modalità production: caricamento da ${distPath}`);
+    mainWindow.loadFile(distPath);
   }
 
   mainWindow.on('closed', () => {
