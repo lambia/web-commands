@@ -81,7 +81,7 @@
         "nsis",
         "portable"
       ],
-      "icon": "public/icons/icon.ico"
+      "icon": "public/app-icon/app-icon-black.ico"
     },
     "nsis": {
       "oneClick": false,
